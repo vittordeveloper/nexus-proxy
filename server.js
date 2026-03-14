@@ -3,11 +3,39 @@ const crypto = require('crypto');
 const path = require('path');
 const app = express();
 
-const SB_URL = process.env.SB_URL || 'https://esfnjnxhbfenziudrhqj.supabase.co';
-const SB_KEY = process.env.SB_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzZm5qbnhoYmZlbnppdWRyaHFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0OTMxMDcsImV4cCI6MjA4OTA2OTEwN30.VNH_8L1Ci4NG_vP_WJf2Y-fK8fTIm5sExJe3jIfPtMY';
-const N8N_WEBHOOK = process.env.N8N_WEBHOOK || 'https://alvesszs2w.app.n8n.cloud/webhook/testereporterrov2x4cj';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'NexusAdmin2026';
+// TODAS credenciais DEVEM estar nas env vars do Railway. ZERO fallbacks.
+const SB_URL = process.env.SB_URL;
+const SB_KEY = process.env.SB_KEY;
+const N8N_WEBHOOK = process.env.N8N_WEBHOOK;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const PORT = process.env.PORT || 3000;
+
+if (!SB_URL || !SB_KEY || !ADMIN_PASSWORD) {
+  console.error('[FATAL] Variáveis obrigatórias não configuradas: SB_URL, SB_KEY, ADMIN_PASSWORD');
+  process.exit(1);
+}
+
+// ===== RATE LIMITING (em memória) =====
+const rateLimits = {};
+function rateLimit(key, maxReqs, windowMs) {
+  const now = Date.now();
+  if (!rateLimits[key]) rateLimits[key] = [];
+  rateLimits[key] = rateLimits[key].filter(t => now - t < windowMs);
+  if (rateLimits[key].length >= maxReqs) return false;
+  rateLimits[key].push(now);
+  return true;
+}
+// Limpar entries antigas a cada 5 min
+setInterval(() => {
+  const now = Date.now();
+  for (const k of Object.keys(rateLimits)) {
+    rateLimits[k] = rateLimits[k].filter(t => now - t < 300000);
+    if (rateLimits[k].length === 0) delete rateLimits[k];
+  }
+}, 300000);
+
+// Admin login lockout
+const adminFailures = {};
 
 app.use(express.json({ limit: '10mb' }));
 
@@ -37,11 +65,21 @@ async function callRPC(name, params) {
 }
 
 function adminAuth(req, res, next) {
-  if (!ADMIN_PASSWORD) return res.status(500).json({ error: 'ADMIN_PASSWORD não configurado' });
+  const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+  // Lockout: 5 falhas = bloqueio por 15 min
+  const fail = adminFailures[ip];
+  if (fail && fail.count >= 5 && (Date.now() - fail.last) < 900000) {
+    return res.status(429).json({ error: 'Muitas tentativas. Tente novamente em 15 minutos.' });
+  }
   const auth = req.headers.authorization;
   if (!auth || auth !== `Bearer ${ADMIN_PASSWORD}`) {
+    if (!adminFailures[ip]) adminFailures[ip] = { count: 0, last: 0 };
+    adminFailures[ip].count++;
+    adminFailures[ip].last = Date.now();
     return res.status(401).json({ error: 'Não autorizado' });
   }
+  // Login OK — resetar falhas
+  delete adminFailures[ip];
   next();
 }
 
@@ -60,8 +98,12 @@ app.get('/', (req, res) => res.json({ status: 'ok', service: 'nexus-proxy' }));
 // EXTENSION ENDPOINTS
 // ============================================================
 
-// Validate key (sem gastar créditos)
+// Validate key (sem gastar créditos) — rate limit: 10 req/min por IP
 app.post('/api/validate', async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+  if (!rateLimit('val:' + ip, 10, 60000)) {
+    return res.status(429).json({ success: false, error: 'Muitas requisições. Aguarde.' });
+  }
   const { api_key } = req.body || {};
   if (!api_key) return res.status(400).json({ success: false, error: 'Chave não fornecida' });
 
@@ -85,8 +127,12 @@ app.post('/api/send', async (req, res) => {
   if (!token) return res.status(400).json({ success: false, error: 'Token não encontrado. Abra o lovable.dev primeiro.' });
   if (!projectId) return res.status(400).json({ success: false, error: 'Project ID não encontrado. Abra um projeto no lovable.dev.' });
 
+  const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+  if (!rateLimit('send:' + ip, 30, 60000)) {
+    return res.status(429).json({ success: false, error: 'Muitas requisições. Aguarde.' });
+  }
   const amount = parseFloat(creditAmount) || 0;
-  if (amount <= 0 || amount > 5) {
+  if (amount < 0.4 || amount > 5) {
     return res.status(400).json({ success: false, error: 'Custo de créditos inválido' });
   }
 
