@@ -38,6 +38,7 @@ setInterval(() => {
 const adminFailures = {};
 
 app.use(express.json({ limit: '10mb' }));
+app.set('trust proxy', 1); // Railway roda atrás de reverse proxy
 
 // ===== CORS =====
 app.use((req, res, next) => {
