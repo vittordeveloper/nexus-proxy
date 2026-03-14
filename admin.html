@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus Admin</title>
+<style>
+:root {
+  --bg: #06061a;
+  --surface: #0c0c28;
+  --surface-2: #12123a;
+  --border: #1a1a4a;
+  --accent: #8b5cf6;
+  --accent-h: #7c3aed;
+  --text: #e2e8f0;
+  --text-2: #94a3b8;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #eab308;
+  --radius: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+input,button,select { font-family:inherit; }
+
+/* ===== LOGIN ===== */
+#loginScreen {
+  display:flex; justify-content:center; align-items:center; min-height:100vh;
+  background:radial-gradient(ellipse at center, #0f0f3a 0%, var(--bg) 70%);
+}
+.login-card {
+  background:var(--surface); padding:2.5rem; border-radius:16px;
+  width:380px; border:1px solid var(--border); text-align:center;
+}
+.login-card h1 {
+  font-size:1.8rem; margin-bottom:0.3rem;
+  background:linear-gradient(135deg,var(--accent),#c084fc);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.login-card p { color:var(--text-2); font-size:0.9rem; margin-bottom:2rem; }
+.login-card input {
+  width:100%; padding:0.8rem 1rem; background:var(--bg); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-size:1rem; margin-bottom:1rem; outline:none;
+}
+.login-card input:focus { border-color:var(--accent); }
+.login-card .btn {
+  width:100%; padding:0.8rem; background:var(--accent); color:#fff; border:none;
+  border-radius:8px; font-size:1rem; cursor:pointer; font-weight:600;
+}
+.login-card .btn:hover { background:var(--accent-h); }
+.login-error { color:var(--red); font-size:0.85rem; margin-bottom:1rem; display:none; }
+
+/* ===== DASHBOARD ===== */
+#dashboard { display:none; max-width:1280px; margin:0 auto; padding:1.5rem; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; }
+header h1 { font-size:1.4rem; display:flex; align-items:center; gap:0.5rem; }
+header h1 span {
+  font-size:0.7rem; background:var(--accent); padding:0.15rem 0.55rem;
+  border-radius:4px; font-weight:500; color:#fff;
+}
+.btn-out {
+  background:none; border:1px solid var(--border); color:var(--text-2);
+  padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.85rem;
+}
+.btn-out:hover { border-color:var(--red); color:var(--red); }
+
+/* Stats */
+.stats {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1rem; margin-bottom:2rem;
+}
+.stat {
+  background:var(--surface); padding:1.2rem 1.4rem; border-radius:var(--radius);
+  border:1px solid var(--border);
+}
+.stat .lb { font-size:0.78rem; color:var(--text-2); text-transform:uppercase; letter-spacing:0.5px; }
+.stat .vl { font-size:2rem; font-weight:700; margin-top:0.25rem; }
+.stat .vl.pur { color:var(--accent); }
+.stat .vl.grn { color:var(--green); }
+.stat .vl.rd { color:var(--red); }
+
+/* Controls */
+.ctrls {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:1.5rem; gap:1rem; flex-wrap:wrap;
+}
+.search {
+  background:var(--surface); border:1px solid var(--border); padding:0.6rem 1rem;
+  border-radius:8px; color:var(--text); min-width:260px; outline:none; font-size:0.9rem;
+}
+.search:focus { border-color:var(--accent); }
+.btn-new {
+  background:var(--accent); color:#fff; border:none; padding:0.65rem 1.4rem;
+  border-radius:8px; cursor:pointer; font-weight:600; font-size:0.9rem;
+  display:flex; align-items:center; gap:0.4rem; white-space:nowrap;
+}
+.btn-new:hover { background:var(--accent-h); }
+
+/* Table */
+.tw {
+  background:var(--surface); border-radius:var(--radius);
+  border:1px solid var(--border); overflow-x:auto;
+}
+table { width:100%; border-collapse:collapse; min-width:850px; }
+th {
+  text-align:left; padding:0.8rem 1rem; border-bottom:1px solid var(--border);
+  color:var(--text-2); font-size:0.78rem; font-weight:600;
+  text-transform:uppercase; letter-spacing:0.5px; background:var(--surface-2);
+}
+th:first-child { border-radius:var(--radius) 0 0 0; }
+th:last-child { border-radius:0 var(--radius) 0 0; }
+td { padding:0.7rem 1rem; border-bottom:1px solid rgba(255,255,255,0.03); font-size:0.88rem; }
+tr:hover td { background:rgba(139,92,246,0.04); }
+
+.kc {
+  font-family:'Courier New',monospace; font-size:0.82rem; color:var(--accent);
+  display:flex; align-items:center; gap:0.5rem;
+}
+.badge {
+  padding:0.2rem 0.65rem; border-radius:999px; font-size:0.72rem;
+  font-weight:600; text-transform:uppercase; letter-spacing:0.3px;
+}
+.badge.active { background:rgba(34,197,94,0.12); color:var(--green); }
+.badge.revoked { background:rgba(239,68,68,0.12); color:var(--red); }
+.cok { color:var(--green); font-weight:600; }
+.czr { color:var(--red); font-weight:600; }
+.acts { display:flex; gap:0.3rem; }
+
+.ba {
+  background:var(--surface-2); border:1px solid var(--border); color:var(--text-2);
+  padding:0.35rem 0.6rem; border-radius:6px; cursor:pointer; font-size:0.78rem;
+  transition:all .15s;
+}
+.ba:hover { border-color:var(--accent); color:var(--text); }
+.ba.dg:hover { border-color:var(--red); color:var(--red); }
+.empty { text-align:center; padding:3rem; color:var(--text-2); }
+
+/* ===== MODAL ===== */
+.mbg {
+  position:fixed; inset:0; background:rgba(0,0,0,0.65); display:none;
+  justify-content:center; align-items:center; z-index:1000; backdrop-filter:blur(4px);
+}
+.mbg.show { display:flex; }
+.mdl {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:2rem; width:440px; max-width:92vw;
+}
+.mdl h3 { margin-bottom:1.2rem; font-size:1.15rem; }
+.mdl label { display:block; margin-bottom:0.3rem; font-size:0.82rem; color:var(--text-2); }
+.mdl input {
+  width:100%; padding:0.65rem 0.8rem; background:var(--bg); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); margin-bottom:1rem; outline:none; font-size:0.95rem;
+}
+.mdl input:focus { border-color:var(--accent); }
+.ma { display:flex; gap:0.75rem; justify-content:flex-end; margin-top:0.5rem; }
+.ma .b {
+  padding:0.6rem 1.3rem; border-radius:8px; cursor:pointer;
+  font-size:0.9rem; font-weight:500; border:none;
+}
+.ma .b.p { background:var(--accent); color:#fff; }
+.ma .b.p:hover { background:var(--accent-h); }
+.ma .b.s { background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
+.ma .b.d { background:var(--red); color:#fff; }
+.ma .b.d:hover { opacity:0.9; }
+
+/* Key result display */
+.kr {
+  background:var(--bg); border:2px solid var(--accent); border-radius:10px;
+  padding:1rem; margin:1rem 0; word-break:break-all;
+  font-family:'Courier New',monospace; font-size:0.88rem;
+  color:var(--accent); line-height:1.5; user-select:all;
+}
+.krl { font-size:0.82rem; color:var(--text-2); margin-bottom:0.5rem; }
+.bcb {
+  width:100%; padding:0.7rem; background:var(--accent); color:#fff; border:none;
+  border-radius:8px; cursor:pointer; font-size:0.95rem; font-weight:600; margin-top:0.5rem;
+}
+.bcb:hover { background:var(--accent-h); }
+
+/* ===== TOAST ===== */
+.toast {
+  position:fixed; bottom:2rem; right:2rem; padding:0.8rem 1.5rem;
+  border-radius:8px; color:#fff; font-size:0.88rem; font-weight:500;
+  opacity:0; transition:opacity .3s; z-index:2000; pointer-events:none;
+}
+.toast.show { opacity:1; }
+.toast.ts { background:var(--green); }
+.toast.te { background:var(--red); }
+.toast.ti { background:var(--accent); }
+
+/* Responsive */
+@media(max-width:640px) {
+  .stats { grid-template-columns:repeat(2,1fr); }
+  .ctrls { flex-direction:column; }
+  .search { width:100%; min-width:0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>Nexus Admin</h1>
+    <p>Painel de gerenciamento de keys</p>
+    <div id="loginErr" class="login-error"></div>
+    <input type="password" id="pwIn" placeholder="Senha do admin" autocomplete="off">
+    <button class="btn" id="btnLogin">Entrar</button>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboard">
+  <header>
+    <h1>Nexus Admin <span>PAINEL</span></h1>
+    <button class="btn-out" id="btnLogout">Sair</button>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="lb">Keys Totais</div><div class="vl pur" id="sT">0</div></div>
+    <div class="stat"><div class="lb">Keys Ativas</div><div class="vl grn" id="sA">0</div></div>
+    <div class="stat"><div class="lb">Créditos Totais</div><div class="vl" id="sC">0</div></div>
+    <div class="stat"><div class="lb">Keys Revogadas</div><div class="vl rd" id="sR">0</div></div>
+  </div>
+
+  <div class="ctrls">
+    <input type="text" class="search" id="searchIn" placeholder="Buscar por key ou nome...">
+    <button class="btn-new" id="btnNew">+ Nova Key</button>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr>
+          <th>Chave</th>
+          <th>Nome</th>
+          <th>Créditos</th>
+          <th>Status</th>
+          <th>Criada em</th>
+          <th>Último uso</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tb"></tbody>
+    </table>
+    <div class="empty" id="emp" style="display:none">Nenhuma key encontrada</div>
+  </div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="mbg" id="mbg">
+  <div class="mdl" id="mbox"></div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+let keys = [], pw = '', editId = '';
+
+// ===== API HELPER =====
+async function api(method, url, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (pw) opts.headers['Authorization'] = 'Bearer ' + pw;
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  if (r.status === 401) { doLogout(); throw new Error('Não autorizado'); }
+  return r.json();
+}
+
+// ===== UTILS =====
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function truncKey(k) {
+  if (!k || k.length <= 20) return k || '';
+  return k.slice(0, 12) + '\u00B7\u00B7\u00B7' + k.slice(-4);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '\u2014';
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type || 'ts');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(function() { t.classList.remove('show'); }, 2800);
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+}
+
+// ===== AUTH =====
+async function doLogin() {
+  const input = document.getElementById('pwIn');
+  const errEl = document.getElementById('loginErr');
+  pw = input.value.trim();
+
+  if (!pw) {
+    errEl.textContent = 'Digite a senha';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const r = await api('POST', '/admin/api/login');
+    if (r.success) {
+      sessionStorage.setItem('nxp', pw);
+      errEl.style.display = 'none';
+      showDash();
+    } else {
+      errEl.textContent = 'Senha incorreta';
+      errEl.style.display = 'block';
+    }
+  } catch (e) {
+    errEl.textContent = 'Senha incorreta';
+    errEl.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  pw = '';
+  sessionStorage.removeItem('nxp');
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('pwIn').value = '';
+}
+
+// ===== DASHBOARD =====
+async function showDash() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  await loadKeys();
+}
+
+async function loadKeys() {
+  try {
+    const data = await api('GET', '/admin/api/keys');
+    keys = Array.isArray(data) ? data : [];
+  } catch (e) {
+    keys = [];
+  }
+  renderStats();
+  renderTable();
+}
+
+function renderStats() {
+  document.getElementById('sT').textContent = keys.length;
+  document.getElementById('sA').textContent = keys.filter(function(k) { return k.status === 'active'; }).length;
+  document.getElementById('sC').textContent = keys.reduce(function(s, k) { return s + (k.credits || 0); }, 0);
+  document.getElementById('sR').textContent = keys.filter(function(k) { return k.status === 'revoked'; }).length;
+}
+
+function renderTable() {
+  var q = (document.getElementById('searchIn').value || '').toLowerCase();
+  var filtered = keys.filter(function(k) {
+    return k.key_value.toLowerCase().indexOf(q) !== -1 || (k.name || '').toLowerCase().indexOf(q) !== -1;
+  });
+
+  var tb = document.getElementById('tb');
+  var emp = document.getElementById('emp');
+
+  if (!filtered.length) {
+    tb.innerHTML = '';
+    emp.style.display = 'block';
+    return;
+  }
+  emp.style.display = 'none';
+
+  tb.innerHTML = filtered.map(function(k) {
+    var statusBadge = k.status === 'active' ? 'Ativa' : 'Revogada';
+    var toggleTitle = k.status === 'active' ? 'Revogar' : 'Ativar';
+    var toggleIcon = k.status === 'active' ? '🔒' : '🔓';
+    var creditClass = k.credits > 0 ? 'cok' : 'czr';
+    var lastUsed = k.last_used_at ? fmtDate(k.last_used_at) : 'Nunca';
+
+    return '<tr>' +
+      '<td><div class="kc"><span>' + esc(truncKey(k.key_value)) + '</span>' +
+        '<button class="ba" data-a="copy" data-v="' + esc(k.key_value) + '" title="Copiar">\uD83D\uDCCB</button></div></td>' +
+      '<td>' + esc(k.name || '\u2014') + '</td>' +
+      '<td class="' + creditClass + '">' + k.credits + '</td>' +
+      '<td><span class="badge ' + k.status + '">' + statusBadge + '</span></td>' +
+      '<td>' + fmtDate(k.created_at) + '</td>' +
+      '<td>' + lastUsed + '</td>' +
+      '<td><div class="acts">' +
+        '<button class="ba" data-a="credits" data-id="' + k.id + '" title="Créditos">\uD83D\uDCB0</button>' +
+        '<button class="ba" data-a="toggle" data-id="' + k.id + '" data-st="' + k.status + '" title="' + toggleTitle + '">' + toggleIcon + '</button>' +
+        '<button class="ba dg" data-a="delete" data-id="' + k.id + '" title="Deletar">\uD83D\uDDD1\uFE0F</button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ===== EVENT DELEGATION =====
+document.getElementById('tb').addEventListener('click', async function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var a = btn.dataset.a;
+  if (a === 'copy') {
+    await copyText(btn.dataset.v);
+    toast('Key copiada!');
+  }
+  if (a === 'credits') showCreditsModal(btn.dataset.id);
+  if (a === 'toggle') await toggleStatus(btn.dataset.id, btn.dataset.st);
+  if (a === 'delete') showDeleteModal(btn.dataset.id);
+});
+
+// ===== MODAL SYSTEM =====
+function showModal(html) {
+  document.getElementById('mbox').innerHTML = html;
+  document.getElementById('mbg').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('mbg').classList.remove('show');
+}
+
+document.getElementById('mbg').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Escape key closes modal
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ===== CREATE KEY =====
+function showCreateModal() {
+  showModal(
+    '<h3>Gerar Nova Key</h3>' +
+    '<label>Nome (opcional)</label>' +
+    '<input id="mName" type="text" placeholder="Ex: Cliente João">' +
+    '<label>Créditos</label>' +
+    '<input id="mCredits" type="number" value="100" min="1">' +
+    '<div class="ma">' +
+      '<button class="b s" id="mcCancel">Cancelar</button>' +
+      '<button class="b p" id="mcGen">Gerar Key</button>' +
+    '</div>'
+  );
+  document.getElementById('mName').focus();
+  document.getElementById('mcCancel').onclick = closeModal;
+  document.getElementById('mcGen').onclick = doGenerate;
+}
+
+async function doGenerate() {
+  var name = document.getElementById('mName').value.trim();
+  var credits = parseInt(document.getElementById('mCredits').value) || 100;
+
+  try {
+    var r = await api('POST', '/admin/api/keys', { name: name, credits: credits });
+    if (r.success) {
+      showModal(
+        '<h3>\u2705 Key Gerada com Sucesso!</h3>' +
+        '<p class="krl">Copie e envie para o cliente:</p>' +
+        '<div class="kr" id="genK">' + esc(r.key) + '</div>' +
+        '<button class="bcb" id="mcCopy">\uD83D\uDCCB Copiar Key</button>' +
+        '<div class="ma" style="margin-top:1rem">' +
+          '<button class="b p" id="mcClose">Fechar</button>' +
+        '</div>'
+      );
+      document.getElementById('mcCopy').onclick = async function() {
+        await copyText(r.key);
+        toast('Key copiada!');
+      };
+      document.getElementById('mcClose').onclick = function() {
+        closeModal();
+        loadKeys();
+      };
+      toast('Key gerada com sucesso!');
+    } else {
+      toast(r.error || 'Erro ao gerar key', 'te');
+    }
+  } catch (e) {
+    toast('Erro ao gerar key', 'te');
+  }
+}
+
+// ===== ADD CREDITS =====
+function showCreditsModal(id) {
+  editId = id;
+  showModal(
+    '<h3>Adicionar Créditos</h3>' +
+    '<label>Quantidade</label>' +
+    '<input id="mAmt" type="number" value="100" min="1">' +
+    '<div class="ma">' +
+      '<button class="b s" id="maCancel">Cancelar</button>' +
+      '<button class="b p" id="maConfirm">Adicionar</button>' +
+    '</div>'
+  );
+  document.getElementById('mAmt').focus();
+  document.getElementById('maCancel').onclick = closeModal;
+  document.getElementById('maConfirm').onclick = doAddCredits;
+}
+
+async function doAddCredits() {
+  var amount = parseInt(document.getElementById('mAmt').value) || 0;
+  if (amount <= 0) { toast('Valor inválido', 'te'); return; }
+  try {
+    var r = await api('POST', '/admin/api/keys/add-credits', { id: editId, amount: amount });
+    if (r.success) {
+      closeModal();
+      await loadKeys();
+      toast('Créditos adicionados!');
+    } else {
+      toast(r.error || 'Erro', 'te');
+    }
+  } catch (e) { toast('Erro', 'te'); }
+}
+
+// ===== TOGGLE STATUS =====
+async function toggleStatus(id, current) {
+  var action = current === 'active' ? 'revoke' : 'activate';
+  try {
+    var r = await api('POST', '/admin/api/keys/' + action, { id: id });
+    if (r.success) {
+      await loadKeys();
+      toast(action === 'revoke' ? 'Key revogada' : 'Key ativada');
+    } else {
+      toast(r.error || 'Erro', 'te');
+    }
+  } catch (e) { toast('Erro', 'te'); }
+}
+
+// ===== DELETE KEY =====
+function showDeleteModal(id) {
+  editId = id;
+  showModal(
+    '<h3>\u26A0\uFE0F Deletar Key?</h3>' +
+    '<p style="color:var(--text-2);margin-bottom:1rem">Esta ação é irreversível. A key será removida permanentemente.</p>' +
+    '<div class="ma">' +
+      '<button class="b s" id="mdCancel">Cancelar</button>' +
+      '<button class="b d" id="mdConfirm">Deletar</button>' +
+    '</div>'
+  );
+  document.getElementById('mdCancel').onclick = closeModal;
+  document.getElementById('mdConfirm').onclick = doDelete;
+}
+
+async function doDelete() {
+  try {
+    var r = await api('POST', '/admin/api/keys/delete', { id: editId });
+    if (r.success) {
+      closeModal();
+      await loadKeys();
+      toast('Key deletada');
+    } else {
+      toast(r.error || 'Erro', 'te');
+    }
+  } catch (e) { toast('Erro', 'te'); }
+}
+
+// ===== EVENT BINDINGS =====
+document.getElementById('btnLogin').addEventListener('click', doLogin);
+document.getElementById('pwIn').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('btnLogout').addEventListener('click', doLogout);
+document.getElementById('btnNew').addEventListener('click', showCreateModal);
+document.getElementById('searchIn').addEventListener('input', renderTable);
+
+// ===== INIT =====
+var saved = sessionStorage.getItem('nxp');
+if (saved) {
+  pw = saved;
+  showDash();
+}
+
+})();
+</script>
+</body>
+</html>
