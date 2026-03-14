@@ -69,25 +69,6 @@ async function callRPC(functionName, params) {
   return { statusCode: response.status, data, ok: response.ok };
 }
 
-// ===== HELPER: Chamar Edge Function =====
-async function callEdgeFunction(path, body) {
-  const response = await fetch(SB_URL + '/functions/v1/' + path, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SB_KEY,
-      'Authorization': 'Bearer ' + SB_KEY
-    },
-    body: JSON.stringify(body)
-  });
-
-  const text = await response.text();
-  let data;
-  try { data = JSON.parse(text); } catch { data = { error: text || 'Resposta inválida' }; }
-
-  return { statusCode: response.status, data, ok: response.ok };
-}
-
 // ===== VALIDAÇÃO SEGURA via RPC (SHA-256 hash comparison) =====
 async function validateKeyViaRPC(apiKey) {
   const keyHash = hashKey(apiKey);
@@ -106,6 +87,38 @@ async function validateKeyViaRPC(apiKey) {
   const errorMsg = (result.data && result.data.error) || 'Chave inválida ou revogada';
   return {
     statusCode: 401,
+    data: { error: errorMsg },
+    ok: false
+  };
+}
+
+// ===== CONSUMIR CRÉDITOS via RPC (valida hash + desconta — sem Edge Function) =====
+async function useCreditsViaRPC(apiKey, amount) {
+  const keyHash = hashKey(apiKey);
+  const result = await callRPC('use_credits_secure', { p_key_hash: keyHash, p_amount: amount });
+
+  if (result.ok && result.data && result.data.success === true) {
+    return {
+      statusCode: 200,
+      data: { success: true, remaining: result.data.remaining },
+      ok: true
+    };
+  }
+
+  // Créditos insuficientes
+  if (result.ok && result.data && result.data.error === 'Créditos insuficientes') {
+    return {
+      statusCode: 402,
+      data: { error: 'Créditos insuficientes', remaining: result.data.remaining || 0 },
+      ok: false
+    };
+  }
+
+  // Chave inválida
+  const errorMsg = (result.data && result.data.error) || 'Chave inválida ou revogada';
+  const statusCode = errorMsg.includes('inválida') || errorMsg.includes('revogada') ? 401 : 500;
+  return {
+    statusCode,
     data: { error: errorMsg },
     ok: false
   };
@@ -142,21 +155,14 @@ app.post('/webhook/nexus-auth-proxy', async (req, res) => {
       return res.status(result.statusCode).json(result);
     }
 
-    // ===== USE CREDITS =====
+    // ===== USE CREDITS (via RPC — valida hash + desconta — ZERO Edge Function) =====
     if (action === 'use_credits') {
       const creditAmount = parseFloat(amount) || 0;
       if (creditAmount <= 0) {
         return res.status(400).json({ statusCode: 400, data: { error: 'Amount deve ser > 0' }, ok: false });
       }
 
-      // PASSO 1: Validar chave completa via RPC ANTES de consumir
-      const validation = await validateKeyViaRPC(api_key);
-      if (!validation.ok) {
-        return res.status(401).json({ statusCode: 401, data: { error: 'Chave inválida ou revogada' }, ok: false });
-      }
-
-      // PASSO 2: Chave válida — consumir créditos via Edge Function
-      const result = await callEdgeFunction('use-credits', { api_key, amount: creditAmount });
+      const result = await useCreditsViaRPC(api_key, creditAmount);
 
       // Atualizar cache
       if (result.ok) {
