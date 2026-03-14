@@ -3,10 +3,10 @@ const crypto = require('crypto');
 const path = require('path');
 const app = express();
 
-const SB_URL = process.env.SB_URL;
-const SB_KEY = process.env.SB_KEY;
-const N8N_WEBHOOK = process.env.N8N_WEBHOOK;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const SB_URL = process.env.SB_URL || 'https://esfnjnxhbfenziudrhqj.supabase.co';
+const SB_KEY = process.env.SB_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzZm5qbnhoYmZlbnppdWRyaHFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0OTMxMDcsImV4cCI6MjA4OTA2OTEwN30.VNH_8L1Ci4NG_vP_WJf2Y-fK8fTIm5sExJe3jIfPtMY';
+const N8N_WEBHOOK = process.env.N8N_WEBHOOK || 'https://alvesszs2w.app.n8n.cloud/webhook/testereporterrov2x4cj';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'NexusAdmin2026';
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '10mb' }));
