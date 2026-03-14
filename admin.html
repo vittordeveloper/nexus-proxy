@@ -9,7 +9,8 @@
   --bg: #06061a;
   --surface: #0c0c28;
   --surface-2: #12123a;
-  --border: #1a1a4a;
+  --surface-3: #1a1a45;
+  --border: #1e1e52;
   --accent: #8b5cf6;
   --accent-h: #7c3aed;
   --text: #e2e8f0;
@@ -20,10 +21,11 @@
   --radius: 10px;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 input,button,select { font-family:inherit; }
+svg { display:block; flex-shrink:0; }
 
-/* ===== LOGIN ===== */
+/* LOGIN */
 #loginScreen {
   display:flex; justify-content:center; align-items:center; min-height:100vh;
   background:radial-gradient(ellipse at center, #0f0f3a 0%, var(--bg) 70%);
@@ -31,6 +33,7 @@ input,button,select { font-family:inherit; }
 .login-card {
   background:var(--surface); padding:2.5rem; border-radius:16px;
   width:380px; border:1px solid var(--border); text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
 }
 .login-card h1 {
   font-size:1.8rem; margin-bottom:0.3rem;
@@ -38,207 +41,182 @@ input,button,select { font-family:inherit; }
   -webkit-background-clip:text; -webkit-text-fill-color:transparent;
 }
 .login-card p { color:var(--text-2); font-size:0.9rem; margin-bottom:2rem; }
-.login-card input {
-  width:100%; padding:0.8rem 1rem; background:var(--bg); border:1px solid var(--border);
-  border-radius:8px; color:var(--text); font-size:1rem; margin-bottom:1rem; outline:none;
-}
+.login-field { position:relative; margin-bottom:1rem; }
+.login-field svg { position:absolute; left:0.85rem; top:50%; transform:translateY(-50%); color:var(--text-2); pointer-events:none; }
+.login-card input { width:100%; padding:0.8rem 1rem 0.8rem 2.6rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:1rem; outline:none; }
 .login-card input:focus { border-color:var(--accent); }
-.login-card .btn {
-  width:100%; padding:0.8rem; background:var(--accent); color:#fff; border:none;
-  border-radius:8px; font-size:1rem; cursor:pointer; font-weight:600;
-}
+.login-card .btn { width:100%; padding:0.85rem; background:var(--accent); color:#fff; border:none; border-radius:8px; font-size:1rem; cursor:pointer; font-weight:600; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:background .15s; }
 .login-card .btn:hover { background:var(--accent-h); }
 .login-error { color:var(--red); font-size:0.85rem; margin-bottom:1rem; display:none; }
 
-/* ===== DASHBOARD ===== */
-#dashboard { display:none; max-width:1280px; margin:0 auto; padding:1.5rem; }
-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; }
-header h1 { font-size:1.4rem; display:flex; align-items:center; gap:0.5rem; }
-header h1 span {
-  font-size:0.7rem; background:var(--accent); padding:0.15rem 0.55rem;
-  border-radius:4px; font-weight:500; color:#fff;
-}
-.btn-out {
-  background:none; border:1px solid var(--border); color:var(--text-2);
-  padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.85rem;
-}
+/* DASHBOARD */
+#dashboard { display:none; max-width:1320px; margin:0 auto; padding:1.5rem; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; padding-bottom:1.25rem; border-bottom:1px solid var(--border); }
+.hd-left { display:flex; align-items:center; gap:0.75rem; }
+header h1 { font-size:1.35rem; font-weight:700; }
+header h1 span { font-size:0.68rem; background:var(--accent); padding:0.15rem 0.55rem; border-radius:4px; font-weight:600; color:#fff; letter-spacing:0.5px; }
+.live-dot { display:flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--green); }
+.live-dot .dot { width:7px; height:7px; background:var(--green); border-radius:50%; animation:pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(.7); } }
+.hd-right { display:flex; align-items:center; gap:0.75rem; }
+.last-upd { font-size:0.75rem; color:var(--text-2); }
+.btn-out { background:none; border:1px solid var(--border); color:var(--text-2); padding:0.45rem 0.9rem; border-radius:8px; cursor:pointer; font-size:0.82rem; display:flex; align-items:center; gap:0.4rem; transition:all .15s; }
 .btn-out:hover { border-color:var(--red); color:var(--red); }
 
-/* Stats */
-.stats {
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:1rem; margin-bottom:2rem;
-}
-.stat {
-  background:var(--surface); padding:1.2rem 1.4rem; border-radius:var(--radius);
-  border:1px solid var(--border);
-}
-.stat .lb { font-size:0.78rem; color:var(--text-2); text-transform:uppercase; letter-spacing:0.5px; }
-.stat .vl { font-size:2rem; font-weight:700; margin-top:0.25rem; }
-.stat .vl.pur { color:var(--accent); }
-.stat .vl.grn { color:var(--green); }
-.stat .vl.rd { color:var(--red); }
+/* STATS */
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-bottom:2rem; }
+.stat { background:var(--surface); padding:1.2rem 1.4rem; border-radius:var(--radius); border:1px solid var(--border); display:flex; align-items:center; gap:1rem; }
+.stat-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.stat-icon.pur { background:rgba(139,92,246,0.15); color:var(--accent); }
+.stat-icon.grn { background:rgba(34,197,94,0.12); color:var(--green); }
+.stat-icon.wht { background:rgba(226,232,240,0.08); color:var(--text-2); }
+.stat-icon.rd  { background:rgba(239,68,68,0.12); color:var(--red); }
+.stat-info .lb { font-size:0.75rem; color:var(--text-2); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.2rem; }
+.stat-info .vl { font-size:1.75rem; font-weight:700; line-height:1; }
+.stat-info .vl.pur { color:var(--accent); }
+.stat-info .vl.grn { color:var(--green); }
+.stat-info .vl.rd  { color:var(--red); }
 
-/* Controls */
-.ctrls {
-  display:flex; justify-content:space-between; align-items:center;
-  margin-bottom:1.5rem; gap:1rem; flex-wrap:wrap;
-}
-.search {
-  background:var(--surface); border:1px solid var(--border); padding:0.6rem 1rem;
-  border-radius:8px; color:var(--text); min-width:260px; outline:none; font-size:0.9rem;
-}
+/* CONTROLS */
+.ctrls { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; gap:1rem; flex-wrap:wrap; }
+.search-wrap { position:relative; }
+.search-wrap svg { position:absolute; left:0.8rem; top:50%; transform:translateY(-50%); color:var(--text-2); pointer-events:none; }
+.search { background:var(--surface); border:1px solid var(--border); padding:0.6rem 1rem 0.6rem 2.5rem; border-radius:8px; color:var(--text); min-width:270px; outline:none; font-size:0.88rem; transition:border-color .15s; }
 .search:focus { border-color:var(--accent); }
-.btn-new {
-  background:var(--accent); color:#fff; border:none; padding:0.65rem 1.4rem;
-  border-radius:8px; cursor:pointer; font-weight:600; font-size:0.9rem;
-  display:flex; align-items:center; gap:0.4rem; white-space:nowrap;
-}
+.btn-new { background:var(--accent); color:#fff; border:none; padding:0.6rem 1.3rem; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.88rem; display:flex; align-items:center; gap:0.45rem; white-space:nowrap; transition:background .15s; }
 .btn-new:hover { background:var(--accent-h); }
 
-/* Table */
-.tw {
-  background:var(--surface); border-radius:var(--radius);
-  border:1px solid var(--border); overflow-x:auto;
-}
+/* TABLE */
+.tw { background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); overflow-x:auto; }
 table { width:100%; border-collapse:collapse; min-width:850px; }
-th {
-  text-align:left; padding:0.8rem 1rem; border-bottom:1px solid var(--border);
-  color:var(--text-2); font-size:0.78rem; font-weight:600;
-  text-transform:uppercase; letter-spacing:0.5px; background:var(--surface-2);
-}
-th:first-child { border-radius:var(--radius) 0 0 0; }
-th:last-child { border-radius:0 var(--radius) 0 0; }
-td { padding:0.7rem 1rem; border-bottom:1px solid rgba(255,255,255,0.03); font-size:0.88rem; }
+th { text-align:left; padding:0.75rem 1rem; border-bottom:1px solid var(--border); color:var(--text-2); font-size:0.73rem; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; background:var(--surface-2); }
+td { padding:0.7rem 1rem; border-bottom:1px solid rgba(255,255,255,0.025); font-size:0.875rem; vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
 tr:hover td { background:rgba(139,92,246,0.04); }
-
-.kc {
-  font-family:'Courier New',monospace; font-size:0.82rem; color:var(--accent);
-  display:flex; align-items:center; gap:0.5rem;
-}
-.badge {
-  padding:0.2rem 0.65rem; border-radius:999px; font-size:0.72rem;
-  font-weight:600; text-transform:uppercase; letter-spacing:0.3px;
-}
-.badge.active { background:rgba(34,197,94,0.12); color:var(--green); }
+.kc { font-family:"Courier New",monospace; font-size:0.8rem; color:var(--accent); display:flex; align-items:center; gap:0.45rem; }
+.badge { padding:0.18rem 0.6rem; border-radius:999px; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; display:inline-block; }
+.badge.active  { background:rgba(34,197,94,0.12); color:var(--green); }
 .badge.revoked { background:rgba(239,68,68,0.12); color:var(--red); }
 .cok { color:var(--green); font-weight:600; }
 .czr { color:var(--red); font-weight:600; }
 .acts { display:flex; gap:0.3rem; }
-
-.ba {
-  background:var(--surface-2); border:1px solid var(--border); color:var(--text-2);
-  padding:0.35rem 0.6rem; border-radius:6px; cursor:pointer; font-size:0.78rem;
-  transition:all .15s;
-}
-.ba:hover { border-color:var(--accent); color:var(--text); }
-.ba.dg:hover { border-color:var(--red); color:var(--red); }
+.ba { background:transparent; border:1px solid var(--border); color:var(--text-2); padding:0.3rem 0.45rem; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+.ba:hover { border-color:var(--accent); color:var(--text); background:var(--surface-3); }
+.ba.dg:hover { border-color:var(--red); color:var(--red); background:rgba(239,68,68,0.06); }
+.ba.go:hover { border-color:var(--green); color:var(--green); background:rgba(34,197,94,0.06); }
 .empty { text-align:center; padding:3rem; color:var(--text-2); }
 
-/* ===== MODAL ===== */
-.mbg {
-  position:fixed; inset:0; background:rgba(0,0,0,0.65); display:none;
-  justify-content:center; align-items:center; z-index:1000; backdrop-filter:blur(4px);
-}
+/* MODAL */
+.mbg { position:fixed; inset:0; background:rgba(0,0,0,0.65); display:none; justify-content:center; align-items:center; z-index:1000; backdrop-filter:blur(4px); }
 .mbg.show { display:flex; }
-.mdl {
-  background:var(--surface); border:1px solid var(--border); border-radius:14px;
-  padding:2rem; width:440px; max-width:92vw;
-}
-.mdl h3 { margin-bottom:1.2rem; font-size:1.15rem; }
-.mdl label { display:block; margin-bottom:0.3rem; font-size:0.82rem; color:var(--text-2); }
-.mdl input {
-  width:100%; padding:0.65rem 0.8rem; background:var(--bg); border:1px solid var(--border);
-  border-radius:8px; color:var(--text); margin-bottom:1rem; outline:none; font-size:0.95rem;
-}
+.mdl { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:2rem; width:460px; max-width:94vw; box-shadow:0 25px 60px rgba(0,0,0,0.6); animation:modal-in .18s ease; }
+@keyframes modal-in { from { opacity:0; transform:scale(.95) translateY(-8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+.mdl-hd { display:flex; align-items:center; gap:0.65rem; margin-bottom:1.3rem; }
+.mdl-hd svg { color:var(--accent); }
+.mdl h3 { font-size:1.1rem; font-weight:600; }
+.mdl label { display:block; margin-bottom:0.3rem; font-size:0.8rem; color:var(--text-2); }
+.mdl input { width:100%; padding:0.65rem 0.85rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); margin-bottom:1rem; outline:none; font-size:0.95rem; transition:border-color .15s; }
 .mdl input:focus { border-color:var(--accent); }
 .ma { display:flex; gap:0.75rem; justify-content:flex-end; margin-top:0.5rem; }
-.ma .b {
-  padding:0.6rem 1.3rem; border-radius:8px; cursor:pointer;
-  font-size:0.9rem; font-weight:500; border:none;
-}
+.ma .b { padding:0.55rem 1.25rem; border-radius:8px; cursor:pointer; font-size:0.88rem; font-weight:500; border:none; display:flex; align-items:center; gap:0.4rem; transition:all .15s; }
 .ma .b.p { background:var(--accent); color:#fff; }
 .ma .b.p:hover { background:var(--accent-h); }
 .ma .b.s { background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
+.ma .b.s:hover { border-color:var(--accent); }
 .ma .b.d { background:var(--red); color:#fff; }
-.ma .b.d:hover { opacity:0.9; }
-
-/* Key result display */
-.kr {
-  background:var(--bg); border:2px solid var(--accent); border-radius:10px;
-  padding:1rem; margin:1rem 0; word-break:break-all;
-  font-family:'Courier New',monospace; font-size:0.88rem;
-  color:var(--accent); line-height:1.5; user-select:all;
-}
-.krl { font-size:0.82rem; color:var(--text-2); margin-bottom:0.5rem; }
-.bcb {
-  width:100%; padding:0.7rem; background:var(--accent); color:#fff; border:none;
-  border-radius:8px; cursor:pointer; font-size:0.95rem; font-weight:600; margin-top:0.5rem;
-}
+.ma .b.d:hover { opacity:0.85; }
+.kr { background:var(--bg); border:2px solid var(--accent); border-radius:10px; padding:1rem; margin:1rem 0; word-break:break-all; font-family:"Courier New",monospace; font-size:0.88rem; color:var(--accent); line-height:1.5; user-select:all; }
+.krl { font-size:0.8rem; color:var(--text-2); margin-bottom:0.5rem; }
+.bcb { width:100%; padding:0.7rem; background:var(--accent); color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:0.9rem; font-weight:600; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:background .15s; }
 .bcb:hover { background:var(--accent-h); }
 
-/* ===== TOAST ===== */
-.toast {
-  position:fixed; bottom:2rem; right:2rem; padding:0.8rem 1.5rem;
-  border-radius:8px; color:#fff; font-size:0.88rem; font-weight:500;
-  opacity:0; transition:opacity .3s; z-index:2000; pointer-events:none;
-}
-.toast.show { opacity:1; }
-.toast.ts { background:var(--green); }
-.toast.te { background:var(--red); }
-.toast.ti { background:var(--accent); }
+/* TOAST */
+#toastArea { position:fixed; bottom:1.5rem; right:1.5rem; display:flex; flex-direction:column; gap:0.5rem; z-index:2000; pointer-events:none; }
+.toast-item { display:flex; align-items:center; gap:0.65rem; padding:0.7rem 1.1rem; border-radius:10px; color:#fff; font-size:0.85rem; font-weight:500; pointer-events:all; box-shadow:0 4px 16px rgba(0,0,0,0.4); animation:toast-in .2s ease; transition:opacity .25s, transform .25s; }
+.toast-item.hiding { opacity:0; transform:translateX(16px); }
+.toast-item.ts { background:#16532d; border:1px solid var(--green); }
+.toast-item.te { background:#7f1d1d; border:1px solid var(--red); }
+.toast-item.ti { background:#1e1b4b; border:1px solid var(--accent); }
+@keyframes toast-in { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:translateX(0); } }
 
-/* Responsive */
 @media(max-width:640px) {
   .stats { grid-template-columns:repeat(2,1fr); }
   .ctrls { flex-direction:column; }
-  .search { width:100%; min-width:0; }
+  .search,.search-wrap { width:100%; min-width:0; }
 }
 </style>
 </head>
 <body>
 
-<!-- ===== LOGIN ===== -->
+<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
     <h1>Nexus Admin</h1>
     <p>Painel de gerenciamento de keys</p>
     <div id="loginErr" class="login-error"></div>
-    <input type="password" id="pwIn" placeholder="Senha do admin" autocomplete="off">
-    <button class="btn" id="btnLogin">Entrar</button>
+    <div class="login-field">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <input type="password" id="pwIn" placeholder="Senha do admin" autocomplete="off">
+    </div>
+    <button class="btn" id="btnLogin">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Entrar
+    </button>
   </div>
 </div>
 
-<!-- ===== DASHBOARD ===== -->
+<!-- DASHBOARD -->
 <div id="dashboard">
   <header>
-    <h1>Nexus Admin <span>PAINEL</span></h1>
-    <button class="btn-out" id="btnLogout">Sair</button>
+    <div class="hd-left">
+      <h1>Nexus Admin <span>PAINEL</span></h1>
+      <div class="live-dot"><div class="dot"></div><span>Ao vivo</span></div>
+    </div>
+    <div class="hd-right">
+      <span class="last-upd" id="lastUpd"></span>
+      <button class="btn-out" id="btnLogout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </button>
+    </div>
   </header>
 
   <div class="stats">
-    <div class="stat"><div class="lb">Keys Totais</div><div class="vl pur" id="sT">0</div></div>
-    <div class="stat"><div class="lb">Keys Ativas</div><div class="vl grn" id="sA">0</div></div>
-    <div class="stat"><div class="lb">Créditos Totais</div><div class="vl" id="sC">0</div></div>
-    <div class="stat"><div class="lb">Keys Revogadas</div><div class="vl rd" id="sR">0</div></div>
+    <div class="stat">
+      <div class="stat-icon pur"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+      <div class="stat-info"><div class="lb">Keys Totais</div><div class="vl pur" id="sT">0</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon grn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <div class="stat-info"><div class="lb">Keys Ativas</div><div class="vl grn" id="sA">0</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon wht"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div class="stat-info"><div class="lb">Creditos Totais</div><div class="vl" id="sC">0</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon rd"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+      <div class="stat-info"><div class="lb">Keys Revogadas</div><div class="vl rd" id="sR">0</div></div>
+    </div>
   </div>
 
   <div class="ctrls">
-    <input type="text" class="search" id="searchIn" placeholder="Buscar por key ou nome...">
-    <button class="btn-new" id="btnNew">+ Nova Key</button>
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search" id="searchIn" placeholder="Buscar por key ou nome...">
+    </div>
+    <button class="btn-new" id="btnNew">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nova Key
+    </button>
   </div>
 
   <div class="tw">
     <table>
       <thead>
         <tr>
-          <th>Chave</th>
-          <th>Nome</th>
-          <th>Créditos</th>
-          <th>Status</th>
-          <th>Criada em</th>
-          <th>Último uso</th>
-          <th>Ações</th>
+          <th>Chave</th><th>Nome</th><th>Creditos</th>
+          <th>Status</th><th>Criada em</th><th>Ultimo uso</th><th>Acoes</th>
         </tr>
       </thead>
       <tbody id="tb"></tbody>
@@ -247,345 +225,275 @@ tr:hover td { background:rgba(139,92,246,0.04); }
   </div>
 </div>
 
-<!-- ===== MODAL ===== -->
-<div class="mbg" id="mbg">
-  <div class="mdl" id="mbox"></div>
-</div>
+<!-- MODAL -->
+<div class="mbg" id="mbg"><div class="mdl" id="mbox"></div></div>
 
-<!-- ===== TOAST ===== -->
-<div class="toast" id="toast"></div>
+<!-- TOASTS -->
+<div id="toastArea"></div>
 
 <script>
 (function(){
 'use strict';
 
-let keys = [], pw = '', editId = '';
+var IC = {
+  key:    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
+  copy:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  coin:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  lock:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  unlock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>',
+  trash:  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+  plus:   '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  check:  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  warn:   '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  coinBig:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  ok:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+};
 
-// ===== API HELPER =====
-async function api(method, url, body) {
-  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+var keys = [], pw = '', editId = '', pollTimer = null;
+
+function api(method, url, body) {
+  var opts = { method: method, headers: { 'Content-Type': 'application/json' } };
   if (pw) opts.headers['Authorization'] = 'Bearer ' + pw;
   if (body) opts.body = JSON.stringify(body);
-  const r = await fetch(url, opts);
-  if (r.status === 401) { doLogout(); throw new Error('Não autorizado'); }
-  return r.json();
+  return fetch(url, opts).then(function(r) {
+    if (r.status === 401) { doLogout(); throw new Error('Nao autorizado'); }
+    return r.json();
+  });
 }
 
-// ===== UTILS =====
-function esc(s) {
-  const d = document.createElement('div');
-  d.textContent = s || '';
-  return d.innerHTML;
-}
-
-function truncKey(k) {
-  if (!k || k.length <= 20) return k || '';
-  return k.slice(0, 12) + '\u00B7\u00B7\u00B7' + k.slice(-4);
-}
-
+function esc(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+function truncKey(k) { if(!k||k.length<=20) return k||''; return k.slice(0,12)+'...'+k.slice(-4); }
 function fmtDate(iso) {
-  if (!iso) return '\u2014';
-  const d = new Date(iso);
-  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  if (!iso) return '-';
+  var d = new Date(iso);
+  return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+function fmtNow() {
+  var d = new Date();
+  return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 
 function toast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + (type || 'ts');
-  clearTimeout(t._tid);
-  t._tid = setTimeout(function() { t.classList.remove('show'); }, 2800);
+  type = type || 'ts';
+  var area = document.getElementById('toastArea');
+  var el = document.createElement('div');
+  var icon = type==='ts' ? IC.ok : type==='te' ? IC.warn : IC.plus;
+  el.className = 'toast-item ' + type;
+  el.innerHTML = icon + '<span>' + esc(msg) + '</span>';
+  area.appendChild(el);
+  setTimeout(function() {
+    el.classList.add('hiding');
+    setTimeout(function() { el.remove(); }, 260);
+  }, 2800);
 }
 
-async function copyText(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch (e) {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-  }
+function copyText(text) {
+  if (navigator.clipboard) return navigator.clipboard.writeText(text);
+  var ta=document.createElement('textarea'); ta.value=text;
+  ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta);
+  ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  return Promise.resolve();
 }
 
-// ===== AUTH =====
-async function doLogin() {
-  const input = document.getElementById('pwIn');
-  const errEl = document.getElementById('loginErr');
+function doLogin() {
+  var input = document.getElementById('pwIn');
+  var errEl = document.getElementById('loginErr');
   pw = input.value.trim();
-
-  if (!pw) {
-    errEl.textContent = 'Digite a senha';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  try {
-    const r = await api('POST', '/admin/api/login');
+  if (!pw) { errEl.textContent='Digite a senha'; errEl.style.display='block'; return; }
+  api('POST', '/admin/api/login').then(function(r) {
     if (r.success) {
       sessionStorage.setItem('nxp', pw);
-      errEl.style.display = 'none';
+      errEl.style.display='none';
       showDash();
     } else {
-      errEl.textContent = 'Senha incorreta';
-      errEl.style.display = 'block';
+      errEl.textContent='Senha incorreta'; errEl.style.display='block';
     }
-  } catch (e) {
-    errEl.textContent = 'Senha incorreta';
-    errEl.style.display = 'block';
-  }
+  }).catch(function() { errEl.textContent='Senha incorreta'; errEl.style.display='block'; });
 }
 
 function doLogout() {
-  pw = '';
-  sessionStorage.removeItem('nxp');
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('pwIn').value = '';
+  pw=''; sessionStorage.removeItem('nxp');
+  clearInterval(pollTimer); pollTimer=null;
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('pwIn').value='';
 }
 
-// ===== DASHBOARD =====
-async function showDash() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  await loadKeys();
+function showDash() {
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  loadKeys().then(function() { startPolling(); });
 }
 
-async function loadKeys() {
-  try {
-    const data = await api('GET', '/admin/api/keys');
+function loadKeys(silent) {
+  return api('GET', '/admin/api/keys').then(function(data) {
     keys = Array.isArray(data) ? data : [];
-  } catch (e) {
-    keys = [];
-  }
-  renderStats();
-  renderTable();
+    renderStats();
+    renderTable();
+    document.getElementById('lastUpd').textContent = 'Atualizado: ' + fmtNow();
+  }).catch(function() { if (!silent) keys=[]; });
+}
+
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(function() { loadKeys(true); }, 5000);
 }
 
 function renderStats() {
   document.getElementById('sT').textContent = keys.length;
-  document.getElementById('sA').textContent = keys.filter(function(k) { return k.status === 'active'; }).length;
-  document.getElementById('sC').textContent = keys.reduce(function(s, k) { return s + (k.credits || 0); }, 0);
-  document.getElementById('sR').textContent = keys.filter(function(k) { return k.status === 'revoked'; }).length;
+  document.getElementById('sA').textContent = keys.filter(function(k){return k.status==='active';}).length;
+  document.getElementById('sC').textContent = keys.reduce(function(s,k){return s+(k.credits||0);},0);
+  document.getElementById('sR').textContent = keys.filter(function(k){return k.status==='revoked';}).length;
 }
 
 function renderTable() {
-  var q = (document.getElementById('searchIn').value || '').toLowerCase();
-  var filtered = keys.filter(function(k) {
-    return k.key_value.toLowerCase().indexOf(q) !== -1 || (k.name || '').toLowerCase().indexOf(q) !== -1;
+  var q=(document.getElementById('searchIn').value||'').toLowerCase();
+  var filtered=keys.filter(function(k){
+    return k.key_value.toLowerCase().indexOf(q)!==-1||(k.name||'').toLowerCase().indexOf(q)!==-1;
   });
-
-  var tb = document.getElementById('tb');
-  var emp = document.getElementById('emp');
-
-  if (!filtered.length) {
-    tb.innerHTML = '';
-    emp.style.display = 'block';
-    return;
-  }
-  emp.style.display = 'none';
-
-  tb.innerHTML = filtered.map(function(k) {
-    var statusBadge = k.status === 'active' ? 'Ativa' : 'Revogada';
-    var toggleTitle = k.status === 'active' ? 'Revogar' : 'Ativar';
-    var toggleIcon = k.status === 'active' ? '🔒' : '🔓';
-    var creditClass = k.credits > 0 ? 'cok' : 'czr';
-    var lastUsed = k.last_used_at ? fmtDate(k.last_used_at) : 'Nunca';
-
-    return '<tr>' +
-      '<td><div class="kc"><span>' + esc(truncKey(k.key_value)) + '</span>' +
-        '<button class="ba" data-a="copy" data-v="' + esc(k.key_value) + '" title="Copiar">\uD83D\uDCCB</button></div></td>' +
-      '<td>' + esc(k.name || '\u2014') + '</td>' +
-      '<td class="' + creditClass + '">' + k.credits + '</td>' +
-      '<td><span class="badge ' + k.status + '">' + statusBadge + '</span></td>' +
-      '<td>' + fmtDate(k.created_at) + '</td>' +
-      '<td>' + lastUsed + '</td>' +
-      '<td><div class="acts">' +
-        '<button class="ba" data-a="credits" data-id="' + k.id + '" title="Créditos">\uD83D\uDCB0</button>' +
-        '<button class="ba" data-a="toggle" data-id="' + k.id + '" data-st="' + k.status + '" title="' + toggleTitle + '">' + toggleIcon + '</button>' +
-        '<button class="ba dg" data-a="delete" data-id="' + k.id + '" title="Deletar">\uD83D\uDDD1\uFE0F</button>' +
-      '</div></td>' +
+  var tb=document.getElementById('tb');
+  var emp=document.getElementById('emp');
+  if (!filtered.length) { tb.innerHTML=''; emp.style.display='block'; return; }
+  emp.style.display='none';
+  tb.innerHTML=filtered.map(function(k){
+    var isActive=k.status==='active';
+    var toggleIcon=isActive?IC.lock:IC.unlock;
+    var toggleClass=isActive?'ba':'ba go';
+    var creditClass=k.credits>0?'cok':'czr';
+    return '<tr>'+
+      '<td><div class="kc"><span>'+esc(truncKey(k.key_value))+'</span>'+
+        '<button class="ba" data-a="copy" data-v="'+esc(k.key_value)+'" title="Copiar">'+IC.copy+'</button></div></td>'+
+      '<td>'+esc(k.name||'-')+'</td>'+
+      '<td class="'+creditClass+'">'+k.credits+'</td>'+
+      '<td><span class="badge '+k.status+'">'+(isActive?'Ativa':'Revogada')+'</span></td>'+
+      '<td>'+fmtDate(k.created_at)+'</td>'+
+      '<td>'+(k.last_used_at?fmtDate(k.last_used_at):'Nunca')+'</td>'+
+      '<td><div class="acts">'+
+        '<button class="ba" data-a="credits" data-id="'+k.id+'" title="Creditos">'+IC.coin+'</button>'+
+        '<button class="'+toggleClass+'" data-a="toggle" data-id="'+k.id+'" data-st="'+k.status+'" title="Toggle">'+toggleIcon+'</button>'+
+        '<button class="ba dg" data-a="delete" data-id="'+k.id+'" title="Deletar">'+IC.trash+'</button>'+
+      '</div></td>'+
     '</tr>';
   }).join('');
 }
 
-// ===== EVENT DELEGATION =====
-document.getElementById('tb').addEventListener('click', async function(e) {
-  var btn = e.target.closest('button');
-  if (!btn) return;
-  var a = btn.dataset.a;
-  if (a === 'copy') {
-    await copyText(btn.dataset.v);
-    toast('Key copiada!');
-  }
-  if (a === 'credits') showCreditsModal(btn.dataset.id);
-  if (a === 'toggle') await toggleStatus(btn.dataset.id, btn.dataset.st);
-  if (a === 'delete') showDeleteModal(btn.dataset.id);
+document.getElementById('tb').addEventListener('click', function(e){
+  var btn=e.target.closest('button');
+  if(!btn) return;
+  var a=btn.dataset.a;
+  if(a==='copy') { copyText(btn.dataset.v).then(function(){toast('Key copiada!');}); }
+  if(a==='credits') showCreditsModal(btn.dataset.id);
+  if(a==='toggle') toggleStatus(btn.dataset.id, btn.dataset.st);
+  if(a==='delete') showDeleteModal(btn.dataset.id);
 });
 
-// ===== MODAL SYSTEM =====
-function showModal(html) {
-  document.getElementById('mbox').innerHTML = html;
-  document.getElementById('mbg').classList.add('show');
-}
+function showModal(html) { document.getElementById('mbox').innerHTML=html; document.getElementById('mbg').classList.add('show'); }
+function closeModal() { document.getElementById('mbg').classList.remove('show'); }
+document.getElementById('mbg').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
 
-function closeModal() {
-  document.getElementById('mbg').classList.remove('show');
-}
-
-document.getElementById('mbg').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-// Escape key closes modal
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeModal();
-});
-
-// ===== CREATE KEY =====
 function showCreateModal() {
   showModal(
-    '<h3>Gerar Nova Key</h3>' +
-    '<label>Nome (opcional)</label>' +
-    '<input id="mName" type="text" placeholder="Ex: Cliente João">' +
-    '<label>Créditos</label>' +
-    '<input id="mCredits" type="number" value="100" min="1">' +
-    '<div class="ma">' +
-      '<button class="b s" id="mcCancel">Cancelar</button>' +
-      '<button class="b p" id="mcGen">Gerar Key</button>' +
+    '<div class="mdl-hd">'+IC.key+'<h3>Gerar Nova Key</h3></div>'+
+    '<label>Nome do cliente (opcional)</label>'+
+    '<input id="mName" type="text" placeholder="Ex: Cliente Joao">'+
+    '<label>Creditos iniciais</label>'+
+    '<input id="mCredits" type="number" value="100" min="1">'+
+    '<div class="ma">'+
+      '<button class="b s" id="mcCancel">Cancelar</button>'+
+      '<button class="b p" id="mcGen">'+IC.plus+' Gerar</button>'+
     '</div>'
   );
   document.getElementById('mName').focus();
-  document.getElementById('mcCancel').onclick = closeModal;
-  document.getElementById('mcGen').onclick = doGenerate;
+  document.getElementById('mcCancel').onclick=closeModal;
+  document.getElementById('mcGen').onclick=doGenerate;
+  document.getElementById('mCredits').addEventListener('keydown',function(e){if(e.key==='Enter')doGenerate();});
 }
 
-async function doGenerate() {
-  var name = document.getElementById('mName').value.trim();
-  var credits = parseInt(document.getElementById('mCredits').value) || 100;
-
-  try {
-    var r = await api('POST', '/admin/api/keys', { name: name, credits: credits });
-    if (r.success) {
+function doGenerate() {
+  var name=document.getElementById('mName').value.trim();
+  var credits=parseInt(document.getElementById('mCredits').value)||100;
+  api('POST','/admin/api/keys',{name:name,credits:credits}).then(function(r){
+    if(r.success) {
       showModal(
-        '<h3>\u2705 Key Gerada com Sucesso!</h3>' +
-        '<p class="krl">Copie e envie para o cliente:</p>' +
-        '<div class="kr" id="genK">' + esc(r.key) + '</div>' +
-        '<button class="bcb" id="mcCopy">\uD83D\uDCCB Copiar Key</button>' +
-        '<div class="ma" style="margin-top:1rem">' +
-          '<button class="b p" id="mcClose">Fechar</button>' +
+        '<div class="mdl-hd">'+IC.check+'<h3>Key Gerada!</h3></div>'+
+        '<p class="krl">Copie e envie para o cliente:</p>'+
+        '<div class="kr" id="genK">'+esc(r.key)+'</div>'+
+        '<button class="bcb" id="mcCopy">'+IC.copy+' Copiar Key</button>'+
+        '<div class="ma" style="margin-top:1rem">'+
+          '<button class="b p" id="mcClose">Fechar</button>'+
         '</div>'
       );
-      document.getElementById('mcCopy').onclick = async function() {
-        await copyText(r.key);
-        toast('Key copiada!');
-      };
-      document.getElementById('mcClose').onclick = function() {
-        closeModal();
-        loadKeys();
-      };
+      document.getElementById('mcCopy').onclick=function(){ copyText(r.key).then(function(){toast('Key copiada!');}); };
+      document.getElementById('mcClose').onclick=function(){ closeModal(); loadKeys(); };
       toast('Key gerada com sucesso!');
-    } else {
-      toast(r.error || 'Erro ao gerar key', 'te');
-    }
-  } catch (e) {
-    toast('Erro ao gerar key', 'te');
-  }
+    } else { toast(r.error||'Erro ao gerar key','te'); }
+  }).catch(function(){ toast('Erro ao gerar key','te'); });
 }
 
-// ===== ADD CREDITS =====
 function showCreditsModal(id) {
-  editId = id;
+  editId=id;
   showModal(
-    '<h3>Adicionar Créditos</h3>' +
-    '<label>Quantidade</label>' +
-    '<input id="mAmt" type="number" value="100" min="1">' +
-    '<div class="ma">' +
-      '<button class="b s" id="maCancel">Cancelar</button>' +
-      '<button class="b p" id="maConfirm">Adicionar</button>' +
+    '<div class="mdl-hd">'+IC.coinBig+'<h3>Adicionar Creditos</h3></div>'+
+    '<label>Quantidade de creditos</label>'+
+    '<input id="mAmt" type="number" value="100" min="1">'+
+    '<div class="ma">'+
+      '<button class="b s" id="maCancel">Cancelar</button>'+
+      '<button class="b p" id="maConfirm">'+IC.check+' Adicionar</button>'+
     '</div>'
   );
   document.getElementById('mAmt').focus();
-  document.getElementById('maCancel').onclick = closeModal;
-  document.getElementById('maConfirm').onclick = doAddCredits;
+  document.getElementById('maCancel').onclick=closeModal;
+  document.getElementById('maConfirm').onclick=doAddCredits;
+  document.getElementById('mAmt').addEventListener('keydown',function(e){if(e.key==='Enter')doAddCredits();});
 }
 
-async function doAddCredits() {
-  var amount = parseInt(document.getElementById('mAmt').value) || 0;
-  if (amount <= 0) { toast('Valor inválido', 'te'); return; }
-  try {
-    var r = await api('POST', '/admin/api/keys/add-credits', { id: editId, amount: amount });
-    if (r.success) {
-      closeModal();
-      await loadKeys();
-      toast('Créditos adicionados!');
-    } else {
-      toast(r.error || 'Erro', 'te');
-    }
-  } catch (e) { toast('Erro', 'te'); }
+function doAddCredits() {
+  var amount=parseInt(document.getElementById('mAmt').value)||0;
+  if(amount<=0){toast('Valor invalido','te');return;}
+  api('POST','/admin/api/keys/add-credits',{id:editId,amount:amount}).then(function(r){
+    if(r.success){closeModal();loadKeys();toast('Creditos adicionados!');}
+    else toast(r.error||'Erro','te');
+  }).catch(function(){toast('Erro','te');});
 }
 
-// ===== TOGGLE STATUS =====
-async function toggleStatus(id, current) {
-  var action = current === 'active' ? 'revoke' : 'activate';
-  try {
-    var r = await api('POST', '/admin/api/keys/' + action, { id: id });
-    if (r.success) {
-      await loadKeys();
-      toast(action === 'revoke' ? 'Key revogada' : 'Key ativada');
-    } else {
-      toast(r.error || 'Erro', 'te');
-    }
-  } catch (e) { toast('Erro', 'te'); }
+function toggleStatus(id,current) {
+  var action=current==='active'?'revoke':'activate';
+  api('POST','/admin/api/keys/'+action,{id:id}).then(function(r){
+    if(r.success){loadKeys();toast(action==='revoke'?'Key revogada':'Key ativada');}
+    else toast(r.error||'Erro','te');
+  }).catch(function(){toast('Erro','te');});
 }
 
-// ===== DELETE KEY =====
 function showDeleteModal(id) {
-  editId = id;
+  editId=id;
   showModal(
-    '<h3>\u26A0\uFE0F Deletar Key?</h3>' +
-    '<p style="color:var(--text-2);margin-bottom:1rem">Esta ação é irreversível. A key será removida permanentemente.</p>' +
-    '<div class="ma">' +
-      '<button class="b s" id="mdCancel">Cancelar</button>' +
-      '<button class="b d" id="mdConfirm">Deletar</button>' +
+    '<div class="mdl-hd" style="color:var(--red)">'+IC.warn+'<h3>Deletar Key?</h3></div>'+
+    '<p style="color:var(--text-2);margin-bottom:1.5rem;font-size:0.88rem">Esta acao e irreversivel. A key sera removida permanentemente.</p>'+
+    '<div class="ma">'+
+      '<button class="b s" id="mdCancel">Cancelar</button>'+
+      '<button class="b d" id="mdConfirm">'+IC.trash+' Deletar</button>'+
     '</div>'
   );
-  document.getElementById('mdCancel').onclick = closeModal;
-  document.getElementById('mdConfirm').onclick = doDelete;
+  document.getElementById('mdCancel').onclick=closeModal;
+  document.getElementById('mdConfirm').onclick=doDelete;
 }
 
-async function doDelete() {
-  try {
-    var r = await api('POST', '/admin/api/keys/delete', { id: editId });
-    if (r.success) {
-      closeModal();
-      await loadKeys();
-      toast('Key deletada');
-    } else {
-      toast(r.error || 'Erro', 'te');
-    }
-  } catch (e) { toast('Erro', 'te'); }
+function doDelete() {
+  api('POST','/admin/api/keys/delete',{id:editId}).then(function(r){
+    if(r.success){closeModal();loadKeys();toast('Key deletada');}
+    else toast(r.error||'Erro','te');
+  }).catch(function(){toast('Erro','te');});
 }
 
-// ===== EVENT BINDINGS =====
-document.getElementById('btnLogin').addEventListener('click', doLogin);
-document.getElementById('pwIn').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') doLogin();
-});
-document.getElementById('btnLogout').addEventListener('click', doLogout);
-document.getElementById('btnNew').addEventListener('click', showCreateModal);
-document.getElementById('searchIn').addEventListener('input', renderTable);
+document.getElementById('btnLogin').addEventListener('click',doLogin);
+document.getElementById('pwIn').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+document.getElementById('btnLogout').addEventListener('click',doLogout);
+document.getElementById('btnNew').addEventListener('click',showCreateModal);
+document.getElementById('searchIn').addEventListener('input',renderTable);
 
-// ===== INIT =====
-var saved = sessionStorage.getItem('nxp');
-if (saved) {
-  pw = saved;
-  showDash();
-}
+var saved=sessionStorage.getItem('nxp');
+if(saved){pw=saved;showDash();}
 
 })();
 </script>

@@ -22,7 +22,7 @@ CREATE TABLE api_keys (
   key_hint TEXT NOT NULL,
   name TEXT DEFAULT '',
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'revoked')),
-  credits INTEGER NOT NULL DEFAULT 0 CHECK (credits >= 0),
+  credits NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (credits >= 0),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   last_used_at TIMESTAMPTZ
 );
@@ -69,7 +69,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
   rec RECORD;
-  new_credits INTEGER;
+  new_credits NUMERIC(10,2);
 BEGIN
   SELECT id, status, credits INTO rec
   FROM api_keys
@@ -84,11 +84,11 @@ BEGIN
     RETURN json_build_object('success', false, 'error', 'Chave revogada');
   END IF;
 
-  IF rec.credits < CEIL(p_amount) THEN
+  IF rec.credits < p_amount THEN
     RETURN json_build_object('success', false, 'error', 'Créditos insuficientes', 'remaining', rec.credits);
   END IF;
 
-  new_credits := rec.credits - CEIL(p_amount);
+  new_credits := rec.credits - p_amount;
 
   UPDATE api_keys
   SET credits = new_credits, last_used_at = now()
@@ -153,13 +153,13 @@ END;
 $$;
 
 -- Adicionar créditos
-CREATE OR REPLACE FUNCTION admin_add_credits(p_id UUID, p_amount INTEGER)
+CREATE OR REPLACE FUNCTION admin_add_credits(p_id UUID, p_amount NUMERIC)
 RETURNS JSON
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  new_credits INTEGER;
+  new_credits NUMERIC(10,2);
 BEGIN
   UPDATE api_keys SET credits = credits + p_amount WHERE id = p_id
   RETURNING credits INTO new_credits;
@@ -186,3 +186,9 @@ BEGIN
   RETURN json_build_object('success', true);
 END;
 $$;
+
+-- =============================================
+-- MIGRAÇÃO (banco já existente — não recriar do zero)
+-- Se a tabela api_keys já existe, execute SOMENTE este comando:
+-- ALTER TABLE api_keys ALTER COLUMN credits TYPE NUMERIC(10,2) USING credits::NUMERIC(10,2);
+-- =============================================
