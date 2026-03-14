@@ -42,7 +42,12 @@ app.set('trust proxy', 1); // Railway roda atrás de reverse proxy
 
 // ===== CORS =====
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin || '';
+  // Permitir apenas chrome-extension:// origins (extensão) e same-origin (admin panel)
+  if (origin.startsWith('chrome-extension://')) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  // Se não tem origin (same-origin/curl) ou é admin panel, não setar CORS → browser bloqueia cross-origin
   res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.sendStatus(204);
@@ -92,6 +97,64 @@ function generateApiKey() {
   return key;
 }
 
+// ===== SERVER-SIDE CREDIT CALCULATOR (espelho do credits.js) =====
+// O server NUNCA confia no creditAmount do client — calcula independentemente
+const COMPLEX_KEYWORDS = ['implementar','implement','criar sistema','create system','refatorar','refactor','redesign','redesenhar','integrar','integrate','migration','migração','database','banco de dados','authentication','autenticação','algoritmo','algorithm','arquitetura','architecture','full-stack','fullstack','backend','frontend','dashboard','painel completo','landing page','crud completo','api rest','restful','multiple files','múltiplos arquivos','vários arquivos','do zero','from scratch','todo o projeto','entire project'];
+const SIMPLE_KEYWORDS = ['mude a cor','change color','altere o texto','change text','corrija','fix','bug','erro simples','typo','alinhar','align','centralizar','center','aumentar','diminuir','increase','decrease','remover','remove','esconder','hide','renomear','rename','padding','margin','fonte','font','tamanho','size'];
+
+function calculateCost(text, imageCount = 0) {
+  const COST_SMALL = 0.4, COST_MEDIUM = 0.9, COST_LARGE = 1.5, COST_MAX = 2.0;
+  if (!text && imageCount === 0) return { cost: COST_SMALL, tier: 'none' };
+
+  const charCount = (text || '').length;
+  const lineCount = (text || '').split('\n').length;
+  let score = 0;
+
+  if (charCount <= 80) score += 5;
+  else if (charCount <= 250) score += 15;
+  else if (charCount <= 600) score += 25;
+  else score += 35;
+
+  const codeBlocks = (text || '').match(/```[\s\S]*?```/g) || [];
+  if (codeBlocks.length > 0) {
+    const totalCodeChars = codeBlocks.reduce((sum, b) => sum + b.length, 0);
+    score += Math.min(20, 8 + codeBlocks.length * 4 + Math.floor(totalCodeChars / 200));
+  }
+
+  const inlineCode = (text || '').match(/`[^`]+`/g) || [];
+  if (inlineCode.length > 0) score += Math.min(5, inlineCode.length);
+
+  const listItems = (text || '').match(/^[\s]*[-•*\d+.]\s/gm) || [];
+  const numberedItems = (text || '').match(/\d+[.)]\s/g) || [];
+  const totalItems = listItems.length + numberedItems.length;
+  if (totalItems >= 5) score += 10;
+  else if (totalItems >= 3) score += 6;
+  else if (totalItems >= 1) score += 3;
+
+  const textLower = (text || '').toLowerCase();
+  const complexMatches = COMPLEX_KEYWORDS.filter(kw => textLower.includes(kw));
+  if (complexMatches.length >= 3) score += 15;
+  else if (complexMatches.length >= 1) score += 8;
+
+  const simpleMatches = SIMPLE_KEYWORDS.filter(kw => textLower.includes(kw));
+  if (simpleMatches.length >= 2 && complexMatches.length === 0) score -= 10;
+  else if (simpleMatches.length >= 1 && complexMatches.length === 0) score -= 5;
+
+  if (imageCount > 0) score += imageCount * 8;
+  if (lineCount > 10) score += 5;
+  else if (lineCount > 5) score += 3;
+
+  score = Math.max(0, Math.min(100, score));
+
+  let cost, tier;
+  if (score <= 15) { cost = COST_SMALL; tier = 'pequeno'; }
+  else if (score <= 35) { cost = COST_MEDIUM; tier = 'médio'; }
+  else if (score <= 65) { cost = COST_LARGE; tier = 'grande'; }
+  else { cost = COST_MAX; tier = 'muito grande'; }
+
+  return { cost, tier };
+}
+
 // ===== HEALTH =====
 app.get('/', (req, res) => res.json({ status: 'ok', service: 'nexus-proxy' }));
 
@@ -132,10 +195,9 @@ app.post('/api/send', async (req, res) => {
   if (!rateLimit('send:' + ip, 30, 60000)) {
     return res.status(429).json({ success: false, error: 'Muitas requisições. Aguarde.' });
   }
-  const amount = parseFloat(creditAmount) || 0;
-  if (amount < 0.4 || amount > 5) {
-    return res.status(400).json({ success: false, error: 'Custo de créditos inválido' });
-  }
+  // CUSTO CALCULADO NO SERVER — client creditAmount é IGNORADO
+  const imageCount = (images && Array.isArray(images)) ? images.length : 0;
+  const { cost: amount } = calculateCost(message, imageCount);
 
   try {
     // 1. Validar + descontar créditos (atômico)
@@ -169,7 +231,7 @@ app.post('/api/send', async (req, res) => {
       return res.status(502).json({ success: false, error: `Erro n8n: ${n8nRes.status}`, remaining: cr.remaining });
     }
 
-    return res.json({ success: true, data: n8nData, remaining: cr.remaining });
+    return res.json({ success: true, data: n8nData, remaining: cr.remaining, charged: amount });
   } catch (e) {
     console.error('[send]', e.message);
     return res.status(502).json({ success: false, error: 'Erro de conexão com o servidor' });
