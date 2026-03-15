@@ -245,17 +245,17 @@ app.post('/api/send', async (req, res) => {
 // ============================================================
 
 // Servir o painel
-app.get('/admin', (req, res) => {
+app.get('/nex/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
 // Verificar login
-app.post('/admin/api/login', adminAuth, (req, res) => {
+app.post('/nex/admin/api/login', adminAuth, (req, res) => {
   res.json({ success: true });
 });
 
 // Listar keys
-app.get('/admin/api/keys', adminAuth, async (req, res) => {
+app.get('/nex/admin/api/keys', adminAuth, async (req, res) => {
   try {
     const data = await callRPC('admin_list_keys', {});
     res.json(Array.isArray(data) ? data : []);
@@ -266,7 +266,7 @@ app.get('/admin/api/keys', adminAuth, async (req, res) => {
 });
 
 // Gerar nova key
-app.post('/admin/api/keys', adminAuth, async (req, res) => {
+app.post('/nex/admin/api/keys', adminAuth, async (req, res) => {
   try {
     const { credits, name } = req.body || {};
     const keyValue = generateApiKey();
@@ -287,7 +287,7 @@ app.post('/admin/api/keys', adminAuth, async (req, res) => {
 });
 
 // Revogar key
-app.post('/admin/api/keys/revoke', adminAuth, async (req, res) => {
+app.post('/nex/admin/api/keys/revoke', adminAuth, async (req, res) => {
   try {
     res.json(await callRPC('admin_update_key_status', { p_id: req.body.id, p_status: 'revoked' }));
   } catch (e) {
@@ -296,7 +296,7 @@ app.post('/admin/api/keys/revoke', adminAuth, async (req, res) => {
 });
 
 // Ativar key
-app.post('/admin/api/keys/activate', adminAuth, async (req, res) => {
+app.post('/nex/admin/api/keys/activate', adminAuth, async (req, res) => {
   try {
     res.json(await callRPC('admin_update_key_status', { p_id: req.body.id, p_status: 'active' }));
   } catch (e) {
@@ -305,7 +305,7 @@ app.post('/admin/api/keys/activate', adminAuth, async (req, res) => {
 });
 
 // Adicionar créditos
-app.post('/admin/api/keys/add-credits', adminAuth, async (req, res) => {
+app.post('/nex/admin/api/keys/add-credits', adminAuth, async (req, res) => {
   try {
     res.json(await callRPC('admin_add_credits', { p_id: req.body.id, p_amount: parseInt(req.body.amount) || 0 }));
   } catch (e) {
@@ -314,7 +314,7 @@ app.post('/admin/api/keys/add-credits', adminAuth, async (req, res) => {
 });
 
 // Deletar key
-app.post('/admin/api/keys/delete', adminAuth, async (req, res) => {
+app.post('/nex/admin/api/keys/delete', adminAuth, async (req, res) => {
   try {
     res.json(await callRPC('admin_delete_key', { p_id: req.body.id }));
   } catch (e) {
