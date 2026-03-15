@@ -286,7 +286,13 @@ app.post('/api/send', async (req, res) => {
 
     const lovableRes = await fetch(`https://api.lovable.dev/projects/${pid}/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      headers: {
+        'content-type': 'application/json',
+        'authorization': `Bearer ${token}`,
+        'accept': '*/*',
+        'accept-encoding': 'gzip, deflate, br',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+      },
       body: JSON.stringify(chatPayload)
     });
 
