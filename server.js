@@ -110,46 +110,48 @@ function calculateCost(text, imageCount = 0) {
   const lineCount = (text || '').split('\n').length;
   let score = 0;
 
-  if (charCount <= 80) score += 5;
-  else if (charCount <= 250) score += 15;
-  else if (charCount <= 600) score += 25;
-  else score += 35;
+  // Tamanho do texto (0-40 pontos)
+  if (charCount <= 50) score += 5;
+  else if (charCount <= 120) score += 12;
+  else if (charCount <= 250) score += 22;
+  else if (charCount <= 600) score += 32;
+  else score += 40;
 
   const codeBlocks = (text || '').match(/```[\s\S]*?```/g) || [];
   if (codeBlocks.length > 0) {
     const totalCodeChars = codeBlocks.reduce((sum, b) => sum + b.length, 0);
-    score += Math.min(20, 8 + codeBlocks.length * 4 + Math.floor(totalCodeChars / 200));
+    score += Math.min(25, 10 + codeBlocks.length * 5 + Math.floor(totalCodeChars / 150));
   }
 
   const inlineCode = (text || '').match(/`[^`]+`/g) || [];
-  if (inlineCode.length > 0) score += Math.min(5, inlineCode.length);
+  if (inlineCode.length > 0) score += Math.min(8, inlineCode.length * 2);
 
   const listItems = (text || '').match(/^[\s]*[-•*\d+.]\s/gm) || [];
   const numberedItems = (text || '').match(/\d+[.)]\s/g) || [];
   const totalItems = listItems.length + numberedItems.length;
-  if (totalItems >= 5) score += 10;
-  else if (totalItems >= 3) score += 6;
-  else if (totalItems >= 1) score += 3;
+  if (totalItems >= 5) score += 12;
+  else if (totalItems >= 3) score += 8;
+  else if (totalItems >= 1) score += 4;
 
   const textLower = (text || '').toLowerCase();
   const complexMatches = COMPLEX_KEYWORDS.filter(kw => textLower.includes(kw));
-  if (complexMatches.length >= 3) score += 15;
-  else if (complexMatches.length >= 1) score += 8;
+  if (complexMatches.length >= 3) score += 18;
+  else if (complexMatches.length >= 1) score += 10;
 
   const simpleMatches = SIMPLE_KEYWORDS.filter(kw => textLower.includes(kw));
-  if (simpleMatches.length >= 2 && complexMatches.length === 0) score -= 10;
-  else if (simpleMatches.length >= 1 && complexMatches.length === 0) score -= 5;
+  if (simpleMatches.length >= 2 && complexMatches.length === 0) score -= 8;
+  else if (simpleMatches.length >= 1 && complexMatches.length === 0) score -= 4;
 
-  if (imageCount > 0) score += imageCount * 8;
-  if (lineCount > 10) score += 5;
+  if (imageCount > 0) score += imageCount * 10;
+  if (lineCount > 10) score += 6;
   else if (lineCount > 5) score += 3;
 
   score = Math.max(0, Math.min(100, score));
 
   let cost, tier;
-  if (score <= 15) { cost = COST_SMALL; tier = 'pequeno'; }
-  else if (score <= 35) { cost = COST_MEDIUM; tier = 'médio'; }
-  else if (score <= 65) { cost = COST_LARGE; tier = 'grande'; }
+  if (score <= 8) { cost = COST_SMALL; tier = 'pequeno'; }
+  else if (score <= 25) { cost = COST_MEDIUM; tier = 'médio'; }
+  else if (score <= 55) { cost = COST_LARGE; tier = 'grande'; }
   else { cost = COST_MAX; tier = 'muito grande'; }
 
   return { cost, tier };
