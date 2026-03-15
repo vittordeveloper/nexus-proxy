@@ -144,6 +144,126 @@ tr:hover td { background:rgba(139,92,246,0.04); }
   .ctrls { flex-direction:column; }
   .search,.search-wrap { width:100%; min-width:0; }
 }
+
+/* USER BADGE */
+.user-badge {
+  display:flex; align-items:center; gap:0.4rem;
+  background:var(--surface-2); border:1px solid var(--border);
+  padding:0.3rem 0.75rem; border-radius:999px;
+  font-size:0.78rem; font-weight:600; color:var(--accent);
+  text-transform:capitalize;
+}
+
+/* TABS */
+.tabs {
+  display:flex; gap:0.25rem; margin-bottom:1.25rem;
+  background:var(--surface); border-radius:var(--radius);
+  border:1px solid var(--border); padding:0.3rem;
+  width:fit-content;
+}
+.tab {
+  background:transparent; border:none; color:var(--text-2);
+  padding:0.5rem 1.2rem; border-radius:8px; cursor:pointer;
+  font-size:0.85rem; font-weight:500; display:flex;
+  align-items:center; gap:0.4rem; transition:all .15s;
+}
+.tab:hover { color:var(--text); background:var(--surface-2); }
+.tab.active { background:var(--accent); color:#fff; }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+/* LOGS */
+.logs-list { display:flex; flex-direction:column; gap:0.5rem; }
+.log-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:0.85rem 1.1rem;
+  display:flex; align-items:center; gap:1rem;
+  transition:background .15s;
+}
+.log-item:hover { background:var(--surface-2); }
+.log-avatar {
+  width:36px; height:36px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.75rem; font-weight:700; text-transform:uppercase;
+  flex-shrink:0;
+}
+.log-avatar.akane { background:rgba(236,72,153,0.15); color:#ec4899; }
+.log-avatar.brenno { background:rgba(59,130,246,0.15); color:#3b82f6; }
+.log-avatar.bot { background:rgba(234,179,8,0.15); color:#eab308; }
+.log-avatar.extensao { background:rgba(249,115,22,0.15); color:#f97316; }
+.log-avatar.unknown { background:rgba(148,163,184,0.1); color:var(--text-2); }
+.log-body { flex:1; min-width:0; }
+.log-details { font-size:0.88rem; color:var(--text); line-height:1.4; }
+.log-details .log-user { font-weight:700; }
+.log-details .log-user.akane { color:#ec4899; }
+.log-details .log-user.brenno { color:#3b82f6; }
+.log-details .log-user.bot { color:#eab308; }
+.log-details .log-user.extensao { color:#f97316; }
+.log-meta { display:flex; align-items:center; gap:0.75rem; margin-top:0.25rem; }
+.log-action {
+  font-size:0.7rem; font-weight:600; text-transform:uppercase;
+  letter-spacing:0.5px; padding:0.12rem 0.5rem;
+  border-radius:999px;
+}
+.log-action.criar_chave { background:rgba(34,197,94,0.12); color:var(--green); }
+.log-action.deletar_chave { background:rgba(239,68,68,0.12); color:var(--red); }
+.log-action.revogar_chave { background:rgba(234,179,8,0.12); color:var(--yellow); }
+.log-action.ativar_chave { background:rgba(34,197,94,0.12); color:var(--green); }
+.log-action.adicionar_creditos { background:rgba(139,92,246,0.12); color:var(--accent); }
+.log-action.login { background:rgba(59,130,246,0.12); color:#3b82f6; }
+.log-action.usar_creditos { background:rgba(249,115,22,0.12); color:#f97316; }
+.log-action.creditos_insuficientes { background:rgba(239,68,68,0.12); color:var(--red); }
+.log-action.validar_chave { background:rgba(34,197,94,0.08); color:var(--green); }
+.log-action.validar_chave_falha { background:rgba(239,68,68,0.08); color:var(--red); }
+.log-action.erro_envio { background:rgba(239,68,68,0.12); color:var(--red); }
+.log-time { font-size:0.75rem; color:var(--text-2); }
+
+/* LOG FILTERS */
+.log-filters {
+  display:flex; gap:0.35rem; flex-wrap:wrap; margin-bottom:1rem;
+}
+.log-filter {
+  background:var(--surface); border:1px solid var(--border);
+  padding:0.3rem 0.7rem; border-radius:999px; cursor:pointer;
+  font-size:0.72rem; font-weight:600; color:var(--text-2);
+  transition:all .15s; text-transform:uppercase; letter-spacing:0.3px;
+}
+.log-filter:hover { border-color:var(--accent); color:var(--text); }
+.log-filter.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+/* CREDIT STATS */
+.credit-stats-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:1rem; margin-top:1rem;
+}
+.credit-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:1.1rem 1.3rem;
+}
+.credit-card-header {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:0.75rem;
+}
+.credit-card-name { font-weight:600; font-size:0.95rem; }
+.credit-card-key { font-family:"Courier New",monospace; font-size:0.72rem; color:var(--accent); }
+.credit-bar-bg {
+  width:100%; height:8px; background:var(--surface-3);
+  border-radius:4px; overflow:hidden; margin:0.5rem 0;
+}
+.credit-bar-fill {
+  height:100%; border-radius:4px; transition:width .3s;
+}
+.credit-bar-fill.high { background:var(--green); }
+.credit-bar-fill.mid { background:var(--yellow); }
+.credit-bar-fill.low { background:var(--red); }
+.credit-card-stats {
+  display:flex; justify-content:space-between;
+  font-size:0.78rem; color:var(--text-2); margin-top:0.3rem;
+}
+.credit-card-stats .val { font-weight:700; color:var(--text); }
+.credit-card-stats .val.green { color:var(--green); }
+.credit-card-stats .val.red { color:var(--red); }
+.credit-card-stats .val.orange { color:#f97316; }
 </style>
 </head>
 <body>
@@ -154,6 +274,14 @@ tr:hover td { background:rgba(139,92,246,0.04); }
     <h1>Nexus Admin</h1>
     <p>Painel de gerenciamento de keys</p>
     <div id="loginErr" class="login-error"></div>
+    <div class="login-field">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <select id="userIn" style="width:100%;padding:0.8rem 1rem 0.8rem 2.6rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:1rem;outline:none;appearance:none;cursor:pointer;">
+        <option value="">Selecione o usuário</option>
+        <option value="akane">akane</option>
+        <option value="brenno">brenno</option>
+      </select>
+    </div>
     <div class="login-field">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       <input type="password" id="pwIn" placeholder="Senha do admin" autocomplete="off">
@@ -173,6 +301,7 @@ tr:hover td { background:rgba(139,92,246,0.04); }
       <div class="live-dot"><div class="dot"></div><span>Ao vivo</span></div>
     </div>
     <div class="hd-right">
+      <span class="user-badge" id="userBadge"></span>
       <span class="last-upd" id="lastUpd"></span>
       <button class="btn-out" id="btnLogout">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -200,6 +329,23 @@ tr:hover td { background:rgba(139,92,246,0.04); }
     </div>
   </div>
 
+  <div class="tabs">
+    <button class="tab active" data-tab="keys">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+      Keys
+    </button>
+    <button class="tab" data-tab="logs">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Logs
+    </button>
+    <button class="tab" data-tab="consumo">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Consumo
+    </button>
+  </div>
+
+  <!-- TAB: KEYS -->
+  <div class="tab-content active" id="tabKeys">
   <div class="ctrls">
     <div class="search-wrap">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -222,6 +368,63 @@ tr:hover td { background:rgba(139,92,246,0.04); }
       <tbody id="tb"></tbody>
     </table>
     <div class="empty" id="emp" style="display:none">Nenhuma key encontrada</div>
+  </div>
+  </div>
+
+  <!-- TAB: LOGS -->
+  <div class="tab-content" id="tabLogs">
+    <div class="ctrls">
+      <div class="search-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="search" id="logSearchIn" placeholder="Buscar nos logs...">
+      </div>
+      <button class="btn-new" id="btnRefreshLogs" style="background:var(--surface-3);border:1px solid var(--border);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Atualizar
+      </button>
+    </div>
+    <div class="log-filters" id="logFilters">
+      <button class="log-filter active" data-filter="all">Todos</button>
+      <button class="log-filter" data-filter="usar_creditos">Uso de Créditos</button>
+      <button class="log-filter" data-filter="criar_chave">Criação de Chaves</button>
+      <button class="log-filter" data-filter="deletar_chave">Deleção</button>
+      <button class="log-filter" data-filter="revogar_chave">Revogação</button>
+      <button class="log-filter" data-filter="ativar_chave">Ativação</button>
+      <button class="log-filter" data-filter="adicionar_creditos">Add Créditos</button>
+      <button class="log-filter" data-filter="login">Login</button>
+      <button class="log-filter" data-filter="validar_chave">Validação</button>
+      <button class="log-filter" data-filter="creditos_insuficientes">Saldo Insuf.</button>
+      <button class="log-filter" data-filter="erro_envio">Erros</button>
+    </div>
+    <div class="logs-list" id="logsList"></div>
+    <div class="empty" id="logsEmpty" style="display:none">Nenhum log encontrado</div>
+  </div>
+
+  <!-- TAB: CONSUMO -->
+  <div class="tab-content" id="tabConsumo">
+    <div class="ctrls">
+      <h3 style="font-size:1rem;font-weight:600;">Consumo de Créditos por Key</h3>
+      <button class="btn-new" id="btnRefreshConsumo" style="background:var(--surface-3);border:1px solid var(--border);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Atualizar
+      </button>
+    </div>
+    <div class="stats" id="consumoTotalStats" style="margin-bottom:1.5rem;">
+      <div class="stat">
+        <div class="stat-icon" style="background:rgba(249,115,22,0.15);color:#f97316;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="stat-info"><div class="lb">Total Gasto</div><div class="vl" id="totalGasto" style="color:#f97316;">0</div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon" style="background:rgba(34,197,94,0.12);color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="stat-info"><div class="lb">Requisições</div><div class="vl grn" id="totalReqs">0</div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon" style="background:rgba(239,68,68,0.12);color:var(--red);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+        <div class="stat-info"><div class="lb">Falhas</div><div class="vl rd" id="totalFails">0</div></div>
+      </div>
+    </div>
+    <div class="credit-stats-grid" id="creditStatsGrid"></div>
+    <div class="empty" id="consumoEmpty" style="display:none">Nenhum dado de consumo ainda</div>
   </div>
 </div>
 
@@ -249,11 +452,12 @@ var IC = {
   ok:     '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
 };
 
-var keys = [], pw = '', editId = '', pollTimer = null;
+var keys = [], logs = [], pw = '', adminUser = '', editId = '', pollTimer = null, activeTab = 'keys', activeLogFilter = 'all';
 
 function api(method, url, body) {
   var opts = { method: method, headers: { 'Content-Type': 'application/json' } };
   if (pw) opts.headers['Authorization'] = 'Bearer ' + pw;
+  if (adminUser) opts.headers['X-Admin-User'] = adminUser;
   if (body) opts.body = JSON.stringify(body);
   return fetch(url, opts).then(function(r) {
     if (r.status === 401) { doLogout(); throw new Error('Nao autorizado'); }
@@ -297,32 +501,39 @@ function copyText(text) {
 
 function doLogin() {
   var input = document.getElementById('pwIn');
+  var userSelect = document.getElementById('userIn');
   var errEl = document.getElementById('loginErr');
+  adminUser = (userSelect.value || '').trim();
   pw = input.value.trim();
+  if (!adminUser) { errEl.textContent='Selecione um usuário'; errEl.style.display='block'; return; }
   if (!pw) { errEl.textContent='Digite a senha'; errEl.style.display='block'; return; }
   api('POST', '/nex/admin/api/login').then(function(r) {
     if (r.success) {
       sessionStorage.setItem('nxp', pw);
+      sessionStorage.setItem('nxu', adminUser);
       errEl.style.display='none';
       showDash();
     } else {
-      errEl.textContent='Senha incorreta'; errEl.style.display='block';
+      errEl.textContent='Senha incorreta ou usuário inválido'; errEl.style.display='block';
     }
-  }).catch(function() { errEl.textContent='Senha incorreta'; errEl.style.display='block'; });
+  }).catch(function() { errEl.textContent='Senha incorreta ou usuário inválido'; errEl.style.display='block'; });
 }
 
 function doLogout() {
-  pw=''; sessionStorage.removeItem('nxp');
+  pw=''; adminUser=''; sessionStorage.removeItem('nxp'); sessionStorage.removeItem('nxu');
   clearInterval(pollTimer); pollTimer=null;
   document.getElementById('dashboard').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('pwIn').value='';
+  document.getElementById('userIn').value='';
 }
 
 function showDash() {
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('dashboard').style.display='block';
+  document.getElementById('userBadge').textContent='👤 ' + adminUser;
   loadKeys().then(function() { startPolling(); });
+  loadLogs();
 }
 
 function loadKeys(silent) {
@@ -491,9 +702,154 @@ document.getElementById('pwIn').addEventListener('keydown',function(e){if(e.key=
 document.getElementById('btnLogout').addEventListener('click',doLogout);
 document.getElementById('btnNew').addEventListener('click',showCreateModal);
 document.getElementById('searchIn').addEventListener('input',renderTable);
+document.getElementById('logSearchIn').addEventListener('input',renderLogs);
+document.getElementById('btnRefreshLogs').addEventListener('click',loadLogs);
+document.getElementById('btnRefreshConsumo').addEventListener('click',loadConsumo);
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(function(tab){
+  tab.addEventListener('click', function(){
+    var target = this.dataset.tab;
+    activeTab = target;
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+    document.querySelectorAll('.tab-content').forEach(function(tc){tc.classList.remove('active');});
+    this.classList.add('active');
+    var tabMap = {keys:'tabKeys',logs:'tabLogs',consumo:'tabConsumo'};
+    document.getElementById(tabMap[target]).classList.add('active');
+    if(target==='logs') loadLogs();
+    if(target==='consumo') loadConsumo();
+  });
+});
+
+// Log filter buttons
+document.getElementById('logFilters').addEventListener('click', function(e){
+  var btn = e.target.closest('.log-filter');
+  if(!btn) return;
+  activeLogFilter = btn.dataset.filter;
+  document.querySelectorAll('.log-filter').forEach(function(f){f.classList.remove('active');});
+  btn.classList.add('active');
+  renderLogs();
+});
+
+// Logs
+function loadLogs() {
+  return api('GET', '/nex/admin/api/logs?limit=200').then(function(data) {
+    logs = Array.isArray(data) ? data : [];
+    renderLogs();
+  }).catch(function() { logs=[]; });
+}
+
+function renderLogs() {
+  var q=(document.getElementById('logSearchIn').value||'').toLowerCase();
+  var filtered=logs.filter(function(l){
+    if(activeLogFilter !== 'all' && l.action !== activeLogFilter) return false;
+    return (l.details||'').toLowerCase().indexOf(q)!==-1 ||
+           (l.admin_user||'').toLowerCase().indexOf(q)!==-1 ||
+           (l.action||'').toLowerCase().indexOf(q)!==-1;
+  });
+  var container=document.getElementById('logsList');
+  var emp=document.getElementById('logsEmpty');
+  if(!filtered.length){ container.innerHTML=''; emp.style.display='block'; return; }
+  emp.style.display='none';
+  var actionLabels = {
+    'criar_chave':'Criou chave','deletar_chave':'Deletou chave',
+    'revogar_chave':'Revogou chave','ativar_chave':'Ativou chave',
+    'adicionar_creditos':'Add créditos','login':'Login',
+    'usar_creditos':'Usou créditos','creditos_insuficientes':'Créditos insuficientes',
+    'validar_chave':'Validou chave','validar_chave_falha':'Validação falhou',
+    'erro_envio':'Erro no envio'
+  };
+  container.innerHTML=filtered.map(function(l){
+    var user = l.admin_user || 'unknown';
+    var initials = user.slice(0,2).toUpperCase();
+    var colorClass = user==='akane'?'akane':user==='brenno'?'brenno':user==='bot'?'bot':(user==='extensão'?'extensao':'unknown');
+    var actionLabel = actionLabels[l.action] || l.action;
+    return '<div class="log-item">'+
+      '<div class="log-avatar '+colorClass+'">'+initials+'</div>'+
+      '<div class="log-body">'+
+        '<div class="log-details"><span class="log-user '+colorClass+'">'+esc(user)+'</span> — '+esc(l.details||actionLabel)+'</div>'+
+        '<div class="log-meta">'+
+          '<span class="log-action '+esc(l.action)+'">'+esc(actionLabel)+'</span>'+
+          '<span class="log-time">'+fmtDate(l.created_at)+'</span>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// Consumo (credit stats calculated from logs)
+function loadConsumo() {
+  return api('GET', '/nex/admin/api/logs?limit=500').then(function(data) {
+    var allLogs = Array.isArray(data) ? data : [];
+    renderConsumo(allLogs);
+  }).catch(function() { renderConsumo([]); });
+}
+
+function renderConsumo(allLogs) {
+  var usageLogs = allLogs.filter(function(l){ return l.action === 'usar_creditos'; });
+  var failLogs = allLogs.filter(function(l){ return l.action === 'creditos_insuficientes' || l.action === 'erro_envio'; });
+
+  var keyStats = {};
+  var totalSpent = 0;
+  usageLogs.forEach(function(l){
+    var details = l.details || '';
+    var keyMatch = details.match(/Chave \.\.\.(\w+)/);
+    var amountMatch = details.match(/gastou ([\d.]+) cr/);
+    var remainMatch = details.match(/restante: ([\d.]+)/);
+
+    var keyHint = keyMatch ? keyMatch[1] : 'unknown';
+    var amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
+    var remaining = remainMatch ? parseFloat(remainMatch[1]) : null;
+
+    if (!keyStats[keyHint]) {
+      keyStats[keyHint] = { key: '...' + keyHint, totalSpent: 0, requests: 0, lastRemaining: null, lastUsed: null };
+    }
+    keyStats[keyHint].totalSpent += amount;
+    keyStats[keyHint].requests++;
+    keyStats[keyHint].lastRemaining = remaining;
+    keyStats[keyHint].lastUsed = l.created_at;
+    totalSpent += amount;
+  });
+
+  document.getElementById('totalGasto').textContent = totalSpent.toFixed(1);
+  document.getElementById('totalReqs').textContent = usageLogs.length;
+  document.getElementById('totalFails').textContent = failLogs.length;
+
+  var grid = document.getElementById('creditStatsGrid');
+  var emp = document.getElementById('consumoEmpty');
+  var entries = Object.values(keyStats).sort(function(a,b){ return b.totalSpent - a.totalSpent; });
+
+  if(!entries.length) { grid.innerHTML=''; emp.style.display='block'; return; }
+  emp.style.display='none';
+
+  grid.innerHTML = entries.map(function(s){
+    var remaining = s.lastRemaining !== null ? s.lastRemaining : '?';
+    var total = s.lastRemaining !== null ? s.totalSpent + s.lastRemaining : null;
+    var pct = total ? Math.min(100, (s.lastRemaining / total) * 100) : 50;
+    var barClass = pct > 60 ? 'high' : pct > 25 ? 'mid' : 'low';
+    var avgPerReq = s.requests > 0 ? (s.totalSpent / s.requests).toFixed(2) : '0';
+
+    return '<div class="credit-card">'+
+      '<div class="credit-card-header">'+
+        '<span class="credit-card-key">🔑 '+esc(s.key)+'</span>'+
+      '</div>'+
+      '<div class="credit-bar-bg"><div class="credit-bar-fill '+barClass+'" style="width:'+pct+'%"></div></div>'+
+      '<div class="credit-card-stats">'+
+        '<div>Gasto: <span class="val orange">'+s.totalSpent.toFixed(1)+'</span></div>'+
+        '<div>Restante: <span class="val green">'+remaining+'</span></div>'+
+        '<div>Reqs: <span class="val">'+s.requests+'</span></div>'+
+      '</div>'+
+      '<div class="credit-card-stats" style="margin-top:0.3rem">'+
+        '<div>Média/req: <span class="val">'+avgPerReq+'</span></div>'+
+        '<div>Último uso: <span class="val">'+fmtDate(s.lastUsed)+'</span></div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
 
 var saved=sessionStorage.getItem('nxp');
-if(saved){pw=saved;showDash();}
+var savedUser=sessionStorage.getItem('nxu');
+if(saved && savedUser){pw=saved;adminUser=savedUser;showDash();}
 
 })();
 </script>

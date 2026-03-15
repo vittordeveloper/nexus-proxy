@@ -37,6 +37,9 @@ setInterval(() => {
 // Admin login lockout
 const adminFailures = {};
 
+// ===== VALID ADMIN USERS =====
+const ADMIN_USERS = ['akane', 'brenno'];
+
 // ===== IMAGE CACHE (em memória, TTL 30min) =====
 const imageCache = new Map();
 const IMAGE_TTL = 30 * 60 * 1000; // 30 minutos
@@ -96,9 +99,24 @@ function adminAuth(req, res, next) {
     adminFailures[ip].last = Date.now();
     return res.status(401).json({ error: 'Não autorizado' });
   }
+  // Extrair username do header
+  const user = (req.headers['x-admin-user'] || '').toLowerCase().trim();
+  if (!user || !ADMIN_USERS.includes(user)) {
+    return res.status(401).json({ error: 'Usuário inválido' });
+  }
+  req.adminUser = user;
   // Login OK — resetar falhas
   delete adminFailures[ip];
   next();
+}
+
+// ===== LOG HELPER =====
+async function createLog(user, action, details) {
+  try {
+    await callRPC('admin_create_log', { p_user: user, p_action: action, p_details: details || '' });
+  } catch (e) {
+    console.error('[log]', e.message);
+  }
 }
 
 function generateApiKey() {
@@ -198,8 +216,12 @@ app.post('/api/validate', async (req, res) => {
   try {
     const result = await callRPC('nexus_validate_key', { p_key: api_key });
     if (result && result.valid === true) {
+      const keyHint = api_key.slice(-4);
+      createLog('extensão', 'validar_chave', `Chave ...${keyHint} validada com sucesso (${result.credits} créditos) — IP: ${ip}`);
       return res.json({ success: true, remaining: result.credits });
     }
+    const keyHint = api_key.slice(-4);
+    createLog('extensão', 'validar_chave_falha', `Tentativa de validar chave ...${keyHint} falhou: ${(result && result.error) || 'inválida'} — IP: ${ip}`);
     return res.status(401).json({ success: false, error: (result && result.error) || 'Chave inválida' });
   } catch (e) {
     console.error('[validate]', e.message);
@@ -225,10 +247,12 @@ app.post('/api/send', async (req, res) => {
 
   try {
     // 1. Validar + descontar créditos (atômico)
+    const keyHint = api_key.slice(-4);
     const cr = await callRPC('nexus_use_credits', { p_key: api_key, p_amount: amount });
     if (!cr || cr.success !== true) {
       const err = (cr && cr.error) || 'Chave inválida';
       const status = err.includes('insuficientes') ? 402 : 401;
+      createLog('extensão', 'creditos_insuficientes', `Chave ...${keyHint} tentou gastar ${amount} créditos mas falhou: ${err} — IP: ${ip}`);
       return res.status(status).json({ success: false, error: err, remaining: (cr && cr.remaining) || 0 });
     }
 
@@ -267,9 +291,11 @@ app.post('/api/send', async (req, res) => {
 
     if (!n8nRes.ok) {
       console.error('[send] n8n error:', n8nRes.status);
+      createLog('extensão', 'erro_envio', `Chave ...${keyHint} gastou ${amount} créditos mas n8n retornou erro ${n8nRes.status} — projeto: ${projectId}`);
       return res.status(502).json({ success: false, error: 'Erro ao processar mensagem', remaining: cr.remaining });
     }
 
+    createLog('extensão', 'usar_creditos', `Chave ...${keyHint} gastou ${amount} créditos (restante: ${cr.remaining}) — projeto: ${projectId} — IP: ${ip}`);
     return res.json({ success: true, remaining: cr.remaining, charged: amount });
   } catch (e) {
     console.error('[send]', e.message);
@@ -287,8 +313,9 @@ app.get('/nex/admin', (req, res) => {
 });
 
 // Verificar login
-app.post('/nex/admin/api/login', adminAuth, (req, res) => {
-  res.json({ success: true });
+app.post('/nex/admin/api/login', adminAuth, async (req, res) => {
+  await createLog(req.adminUser, 'login', `${req.adminUser} fez login`);
+  res.json({ success: true, user: req.adminUser });
 });
 
 // Listar keys
@@ -313,6 +340,7 @@ app.post('/nex/admin/api/keys', adminAuth, async (req, res) => {
       p_name: name || ''
     });
     if (result && result.success) {
+      await createLog(req.adminUser, 'criar_chave', `${req.adminUser} criou chave para "${name || 'sem nome'}" com ${credits || 100} créditos`);
       res.json({ success: true, key: keyValue, id: result.id });
     } else {
       res.status(500).json({ success: false, error: (result && result.error) || 'Erro ao criar key' });
@@ -326,7 +354,9 @@ app.post('/nex/admin/api/keys', adminAuth, async (req, res) => {
 // Revogar key
 app.post('/nex/admin/api/keys/revoke', adminAuth, async (req, res) => {
   try {
-    res.json(await callRPC('admin_update_key_status', { p_id: req.body.id, p_status: 'revoked' }));
+    const result = await callRPC('admin_update_key_status', { p_id: req.body.id, p_status: 'revoked' });
+    if (result && result.success) await createLog(req.adminUser, 'revogar_chave', `${req.adminUser} revogou chave ${req.body.id}`);
+    res.json(result);
   } catch (e) {
     res.status(500).json({ error: 'Erro ao revogar' });
   }
@@ -335,7 +365,9 @@ app.post('/nex/admin/api/keys/revoke', adminAuth, async (req, res) => {
 // Ativar key
 app.post('/nex/admin/api/keys/activate', adminAuth, async (req, res) => {
   try {
-    res.json(await callRPC('admin_update_key_status', { p_id: req.body.id, p_status: 'active' }));
+    const result = await callRPC('admin_update_key_status', { p_id: req.body.id, p_status: 'active' });
+    if (result && result.success) await createLog(req.adminUser, 'ativar_chave', `${req.adminUser} ativou chave ${req.body.id}`);
+    res.json(result);
   } catch (e) {
     res.status(500).json({ error: 'Erro ao ativar' });
   }
@@ -344,7 +376,9 @@ app.post('/nex/admin/api/keys/activate', adminAuth, async (req, res) => {
 // Adicionar créditos
 app.post('/nex/admin/api/keys/add-credits', adminAuth, async (req, res) => {
   try {
-    res.json(await callRPC('admin_add_credits', { p_id: req.body.id, p_amount: parseInt(req.body.amount) || 0 }));
+    const result = await callRPC('admin_add_credits', { p_id: req.body.id, p_amount: parseInt(req.body.amount) || 0 });
+    if (result && result.success) await createLog(req.adminUser, 'adicionar_creditos', `${req.adminUser} adicionou ${req.body.amount} créditos à chave ${req.body.id}`);
+    res.json(result);
   } catch (e) {
     res.status(500).json({ error: 'Erro ao adicionar créditos' });
   }
@@ -353,9 +387,34 @@ app.post('/nex/admin/api/keys/add-credits', adminAuth, async (req, res) => {
 // Deletar key
 app.post('/nex/admin/api/keys/delete', adminAuth, async (req, res) => {
   try {
-    res.json(await callRPC('admin_delete_key', { p_id: req.body.id }));
+    const result = await callRPC('admin_delete_key', { p_id: req.body.id });
+    if (result && result.success) await createLog(req.adminUser, 'deletar_chave', `${req.adminUser} deletou chave ${req.body.id}`);
+    res.json(result);
   } catch (e) {
     res.status(500).json({ error: 'Erro ao deletar' });
+  }
+});
+
+// Listar logs
+app.get('/nex/admin/api/logs', adminAuth, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 200;
+    const data = await callRPC('admin_list_logs', { p_limit: Math.min(limit, 500) });
+    res.json(Array.isArray(data) ? data : []);
+  } catch (e) {
+    console.error('[admin/logs]', e.message);
+    res.status(500).json({ error: 'Erro ao buscar logs' });
+  }
+});
+
+// Estatísticas de consumo de créditos por chave
+app.get('/nex/admin/api/stats/credits', adminAuth, async (req, res) => {
+  try {
+    const data = await callRPC('admin_credit_stats', {});
+    res.json(Array.isArray(data) ? data : []);
+  } catch (e) {
+    console.error('[admin/stats]', e.message);
+    res.status(500).json({ error: 'Erro ao buscar stats' });
   }
 });
 
