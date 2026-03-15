@@ -6,7 +6,6 @@ const app = express();
 // TODAS credenciais DEVEM estar nas env vars do Railway. ZERO fallbacks.
 const SB_URL = process.env.SB_URL;
 const SB_KEY = process.env.SB_KEY;
-const N8N_WEBHOOK = process.env.N8N_WEBHOOK;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const PORT = process.env.PORT || 3000;
 
@@ -185,7 +184,7 @@ app.post('/api/validate', async (req, res) => {
   }
 });
 
-// Send message (validar + descontar créditos + encaminhar pro n8n)
+// Send message (validar + descontar créditos + encaminhar pro Lovable)
 app.post('/api/send', async (req, res) => {
   const { api_key, message, token, projectId, images, creditAmount } = req.body || {};
   if (!api_key) return res.status(400).json({ success: false, error: 'Chave não fornecida' });
@@ -210,30 +209,31 @@ app.post('/api/send', async (req, res) => {
       return res.status(status).json({ success: false, error: err, remaining: (cr && cr.remaining) || 0 });
     }
 
-    // 2. Encaminhar pro n8n
-    if (!N8N_WEBHOOK) {
-      return res.status(500).json({ success: false, error: 'N8N webhook não configurado', remaining: cr.remaining });
-    }
-
-    const n8nBody = { message, token, projectId };
+    // 2. Enviar direto para a API do Lovable (sem n8n)
+    const lovableUrl = `https://api.lovable.dev/projects/${encodeURIComponent(projectId)}/chat`;
+    const lovableBody = { message };
     if (images && images.length > 0) {
-      n8nBody.files = images.map((img, i) => ({ data: img, name: `image_${i}.png`, type: 'image/png' }));
+      lovableBody.files = images.map((img, i) => ({ data: img, name: `image_${i}.png`, type: 'image/png' }));
     }
 
-    const n8nRes = await fetch(N8N_WEBHOOK, {
+    const lovableRes = await fetch(lovableUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(n8nBody)
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(lovableBody)
     });
 
-    let n8nData;
-    try { n8nData = await n8nRes.json(); } catch { n8nData = {}; }
+    let lovableData;
+    try { lovableData = await lovableRes.json(); } catch { lovableData = {}; }
 
-    if (!n8nRes.ok) {
-      return res.status(502).json({ success: false, error: `Erro n8n: ${n8nRes.status}`, remaining: cr.remaining });
+    if (!lovableRes.ok) {
+      console.error('[send] Lovable error:', lovableRes.status, lovableData);
+      return res.status(502).json({ success: false, error: `Erro ao enviar: ${lovableRes.status}`, remaining: cr.remaining });
     }
 
-    return res.json({ success: true, data: n8nData, remaining: cr.remaining, charged: amount });
+    return res.json({ success: true, data: lovableData, remaining: cr.remaining, charged: amount });
   } catch (e) {
     console.error('[send]', e.message);
     return res.status(502).json({ success: false, error: 'Erro de conexão com o servidor' });
