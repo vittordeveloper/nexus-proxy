@@ -37,7 +37,8 @@ setInterval(() => {
 const adminFailures = {};
 
 app.use(express.json({ limit: '10mb' }));
-app.set('trust proxy', 1); // Railway roda atrás de reverse proxy
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
 
 // ===== CORS =====
 app.use((req, res, next) => {
@@ -157,7 +158,7 @@ function calculateCost(text, imageCount = 0) {
 }
 
 // ===== HEALTH =====
-app.get('/', (req, res) => res.json({ status: 'ok', service: 'nexus-proxy' }));
+app.get('/', (req, res) => res.json({ status: 'ok' }));
 
 // ============================================================
 // EXTENSION ENDPOINTS
@@ -184,7 +185,7 @@ app.post('/api/validate', async (req, res) => {
   }
 });
 
-// Send message (validar + descontar créditos + encaminhar pro Lovable)
+// Send message (validar + descontar créditos + encaminhar)
 app.post('/api/send', async (req, res) => {
   const { api_key, message, token, projectId, images, creditAmount } = req.body || {};
   if (!api_key) return res.status(400).json({ success: false, error: 'Chave não fornecida' });
@@ -209,7 +210,7 @@ app.post('/api/send', async (req, res) => {
       return res.status(status).json({ success: false, error: err, remaining: (cr && cr.remaining) || 0 });
     }
 
-    // 2. Gerar IDs únicos para o payload
+    // 2. Gerar IDs
     const alphabet = '0123456789abcdefghjkmnpqrstvwxyz';
     const gen = (len) => Array.from({length: len}, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
     const timePrefix = '01kf';
@@ -217,7 +218,7 @@ app.post('/api/send', async (req, res) => {
     const ai_message_id = 'aimsg_' + timePrefix + gen(22);
     const error_id = 'error_' + timePrefix + gen(22);
 
-    // 3. Upload de imagens via Lovable file upload API (se houver)
+    // 3. Upload de imagens (se houver)
     let fileRefs = [];
     let optimisticUrls = [];
     let userId = '';
@@ -248,7 +249,7 @@ app.post('/api/send', async (req, res) => {
       }
     }
 
-    // 4. Report Error fake (cria error_id no Lovable)
+    // 4. Preparar contexto
     const pid = encodeURIComponent(projectId);
     await fetch(`https://api.lovable.dev/projects/${pid}/report_error`, {
       method: 'POST',
@@ -260,7 +261,7 @@ app.post('/api/send', async (req, res) => {
       })
     });
 
-    // 5. Enviar chat com payload completo (mode instant + error)
+    // 5. Enviar mensagem
     const chatPayload = {
       id: message_id,
       message: message + '\n\n<details><summary>⚙️</summary>\n' + message + '\n</details>',
@@ -288,15 +289,12 @@ app.post('/api/send', async (req, res) => {
       body: JSON.stringify(chatPayload)
     });
 
-    let lovableData;
-    try { lovableData = await lovableRes.json(); } catch { lovableData = {}; }
-
     if (!lovableRes.ok) {
-      console.error('[send] Lovable error:', lovableRes.status, lovableData);
-      return res.status(502).json({ success: false, error: `Erro ao enviar: ${lovableRes.status}`, remaining: cr.remaining });
+      console.error('[send] Lovable error:', lovableRes.status);
+      return res.status(502).json({ success: false, error: 'Erro ao processar mensagem', remaining: cr.remaining });
     }
 
-    return res.json({ success: true, data: lovableData, remaining: cr.remaining, charged: amount });
+    return res.json({ success: true, remaining: cr.remaining, charged: amount });
   } catch (e) {
     console.error('[send]', e.message);
     return res.status(502).json({ success: false, error: 'Erro de conexão com o servidor' });
@@ -386,6 +384,7 @@ app.post('/nex/admin/api/keys/delete', adminAuth, async (req, res) => {
 });
 
 // ===== START =====
+app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 app.listen(PORT, () => {
   console.log(`[nexus-proxy] Running on port ${PORT}`);
 });
