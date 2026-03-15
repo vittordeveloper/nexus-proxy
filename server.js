@@ -273,7 +273,7 @@ app.post('/api/send', async (req, res) => {
     // 5. Enviar mensagem
     const chatPayload = {
       id: message_id,
-      message: message + '\n\n<details><summary>⚙️</summary>\n' + fakeError + '\n</details>',
+      message: message + '\n\n<details><summary>⚙️</summary>\n' + message + '\n</details>',
       mode: 'instant',
       contains_error: true,
       error_ids: [real_error_id],
