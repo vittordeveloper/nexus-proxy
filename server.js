@@ -37,6 +37,17 @@ setInterval(() => {
 // Admin login lockout
 const adminFailures = {};
 
+// ===== IMAGE CACHE (em memória, TTL 30min) =====
+const imageCache = new Map();
+const IMAGE_TTL = 30 * 60 * 1000; // 30 minutos
+// Limpar imagens expiradas a cada 5 min
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, entry] of imageCache) {
+    if (now - entry.ts > IMAGE_TTL) imageCache.delete(id);
+  }
+}, 300000);
+
 app.use(express.json({ limit: '10mb' }));
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
@@ -165,6 +176,16 @@ app.get('/', (req, res) => res.json({ status: 'ok' }));
 // EXTENSION ENDPOINTS
 // ============================================================
 
+// Servir imagens do cache (público, sem auth)
+app.get('/img/:id', (req, res) => {
+  const entry = imageCache.get(req.params.id);
+  if (!entry) return res.status(404).send('Not found');
+  const buf = Buffer.from(entry.data, 'base64');
+  res.set('Content-Type', entry.mime);
+  res.set('Cache-Control', 'public, max-age=1800');
+  res.send(buf);
+});
+
 // Validate key (sem gastar créditos) — rate limit: 10 req/min por IP
 app.post('/api/validate', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
@@ -211,9 +232,32 @@ app.post('/api/send', async (req, res) => {
       return res.status(status).json({ success: false, error: err, remaining: (cr && cr.remaining) || 0 });
     }
 
-    // 2. Encaminhar para n8n (que faz report_error + chat)
-    const n8nPayload = { message, token, projectId };
-    if (images && images.length > 0) n8nPayload.images = images;
+    // 2. Se tem imagens, salvar no cache e gerar URLs
+    let finalMessage = message;
+    if (images && images.length > 0) {
+      const baseUrl = `https://${req.headers.host || 'nexus-proxy-production.up.railway.app'}`;
+      const imageUrls = [];
+      for (let i = 0; i < images.length; i++) {
+        const imgId = crypto.randomUUID();
+        const raw = images[i];
+        // Extrair mime e data do base64 (pode vir como data:image/png;base64,xxx ou só xxx)
+        let mime = 'image/png';
+        let data = raw;
+        if (raw.includes(',')) {
+          const match = raw.match(/^data:([^;]+);base64,/);
+          if (match) mime = match[1];
+          data = raw.split(',')[1];
+        }
+        imageCache.set(imgId, { data, mime, ts: Date.now() });
+        imageUrls.push(`${baseUrl}/img/${imgId}`);
+      }
+      // Adicionar URLs das imagens ao final do prompt
+      const imgSection = imageUrls.map((url, i) => `[Imagem ${i + 1} anexada pelo usuário: ${url}]`).join('\n');
+      finalMessage = message + '\n\n' + imgSection;
+    }
+
+    // 3. Encaminhar para n8n (SEM imagens base64 — só texto com URLs)
+    const n8nPayload = { message: finalMessage, token, projectId };
 
     const n8nRes = await fetch(N8N_WEBHOOK, {
       method: 'POST',
