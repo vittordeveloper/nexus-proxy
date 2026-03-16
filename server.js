@@ -207,8 +207,8 @@ app.get('/img/:id', (req, res) => {
 // Validate key (sem gastar créditos) — rate limit: 10 req/min por IP
 app.post('/api/validate', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
-  if (!rateLimit('val:' + ip, 10, 60000)) {
-    return res.status(429).json({ success: false, error: 'Muitas requisições. Aguarde.' });
+  if (!rateLimit('val:' + ip, 20, 60000)) {
+    return res.status(429).json({ success: false, error: 'RATE_LIMITED' });
   }
   const { api_key } = req.body || {};
   if (!api_key) return res.status(400).json({ success: false, error: 'Chave não fornecida' });
@@ -238,8 +238,8 @@ app.post('/api/send', async (req, res) => {
   if (!projectId) return res.status(400).json({ success: false, error: 'Project ID não encontrado. Abra um projeto no lovable.dev.' });
 
   const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
-  if (!rateLimit('send:' + ip, 30, 60000)) {
-    return res.status(429).json({ success: false, error: 'Muitas requisições. Aguarde.' });
+  if (!rateLimit('send:' + ip, 60, 60000)) {
+    return res.status(429).json({ success: false, error: 'RATE_LIMITED' });
   }
   // CUSTO CALCULADO NO SERVER — client creditAmount é IGNORADO
   const imageCount = (images && Array.isArray(images)) ? images.length : 0;
