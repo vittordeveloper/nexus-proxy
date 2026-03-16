@@ -133,7 +133,7 @@ const COMPLEX_KEYWORDS = ['implementar','implement','criar sistema','create syst
 const SIMPLE_KEYWORDS = ['mude a cor','change color','altere o texto','change text','corrija','fix','bug','erro simples','typo','alinhar','align','centralizar','center','aumentar','diminuir','increase','decrease','remover','remove','esconder','hide','renomear','rename','padding','margin','fonte','font','tamanho','size'];
 
 function calculateCost(text, imageCount = 0) {
-  const COST_SMALL = 0.4, COST_MEDIUM = 0.9, COST_LARGE = 1.5, COST_MAX = 2.0;
+  const COST_SMALL = 0.8, COST_SMALL_MED = 1.2, COST_MEDIUM = 1.8, COST_MED_LARGE = 2.9, COST_LARGE = 3.9;
   if (!text && imageCount === 0) return { cost: COST_SMALL, tier: 'none' };
 
   const charCount = (text || '').length;
@@ -180,9 +180,10 @@ function calculateCost(text, imageCount = 0) {
 
   let cost, tier;
   if (score <= 8) { cost = COST_SMALL; tier = 'pequeno'; }
-  else if (score <= 25) { cost = COST_MEDIUM; tier = 'médio'; }
-  else if (score <= 55) { cost = COST_LARGE; tier = 'grande'; }
-  else { cost = COST_MAX; tier = 'muito grande'; }
+  else if (score <= 20) { cost = COST_SMALL_MED; tier = 'pequeno-médio'; }
+  else if (score <= 38) { cost = COST_MEDIUM; tier = 'médio'; }
+  else if (score <= 60) { cost = COST_MED_LARGE; tier = 'médio-grande'; }
+  else { cost = COST_LARGE; tier = 'grande'; }
 
   return { cost, tier };
 }
