@@ -207,10 +207,11 @@ app.get('/img/:id', (req, res) => {
 // Validate key (sem gastar créditos) — rate limit: 10 req/min por IP
 app.post('/api/validate', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
-  if (!rateLimit('val:' + ip, 20, 60000)) {
+  const { api_key, vip } = req.body || {};
+  // VIP: sem rate limit
+  if (!vip && !rateLimit('val:' + ip, 20, 60000)) {
     return res.status(429).json({ success: false, error: 'RATE_LIMITED' });
   }
-  const { api_key } = req.body || {};
   if (!api_key) return res.status(400).json({ success: false, error: 'Chave não fornecida' });
 
   try {
@@ -231,14 +232,15 @@ app.post('/api/validate', async (req, res) => {
 
 // Send message (validar + descontar créditos + encaminhar)
 app.post('/api/send', async (req, res) => {
-  const { api_key, message, token, projectId, images, creditAmount } = req.body || {};
+  const { api_key, message, token, projectId, images, creditAmount, vip } = req.body || {};
   if (!api_key) return res.status(400).json({ success: false, error: 'Chave não fornecida' });
   if (!message) return res.status(400).json({ success: false, error: 'Mensagem não fornecida' });
   if (!token) return res.status(400).json({ success: false, error: 'Token não encontrado. Abra o lovable.dev primeiro.' });
   if (!projectId) return res.status(400).json({ success: false, error: 'Project ID não encontrado. Abra um projeto no lovable.dev.' });
 
   const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
-  if (!rateLimit('send:' + ip, 60, 60000)) {
+  // VIP: sem rate limit
+  if (!vip && !rateLimit('send:' + ip, 60, 60000)) {
     return res.status(429).json({ success: false, error: 'RATE_LIMITED' });
   }
   // CUSTO CALCULADO NO SERVER — client creditAmount é IGNORADO
